@@ -1,0 +1,29 @@
+{
+  "name": "input-phone-mask",
+  "version": "1.0.0",
+  "description": "Simple input phone mask on vanilla js",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fillika/input-phone-mask.git"
+  },
+  "keywords": [
+    "input",
+    "mask",
+    "inputMask",
+    "vanilla",
+    "js",
+    "mask",
+    "mask",
+    "js"
+  ],
+  "author": "Alexandr Mironenko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fillika/input-phone-mask/issues"
+  },
+  "homepage": "https://github.com/fillika/input-phone-mask#readme"
+}
