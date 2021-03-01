@@ -10,7 +10,8 @@ function init(input, config) {
         onlyNumbers: /\d+/gm,
         notNumbers: /\D+/gm,
     };
-    let template = "";
+    let template = "+7 (___) ___-__-__";
+    input.value = template;
     new Promise((resolve) => {
         const resultArr = parseTemplate(mask);
         console.log(resultArr);
@@ -24,17 +25,23 @@ function init(input, config) {
             }
         });
     });
+    input.addEventListener("focus", () => {
+        console.log("focus");
+        setTimeout(() => {
+            input.selectionStart = input.selectionEnd = 4;
+        });
+    });
     input.addEventListener("input", (event) => {
         if (event.target !== undefined && event.target !== null) {
-            const value = event.target.value;
+            const { value } = event.target;
             const { inputType } = event;
             const valueWithOnlyNumbers = value.replace(/\D/g, "");
-            const countryCode = valueWithOnlyNumbers.slice(0, 1);
+            console.log(value);
+            const countryCode = 7;
             const firstThree = valueWithOnlyNumbers.slice(1, 4);
             const secondThree = valueWithOnlyNumbers.slice(4, 7);
             const firstTwo = valueWithOnlyNumbers.slice(7, 9);
             const secondTwo = valueWithOnlyNumbers.slice(9, 11);
-            let template = "";
             switch (inputType) {
                 case "insertText":
                     break;
@@ -44,13 +51,6 @@ function init(input, config) {
                     break;
                 default:
                     break;
-            }
-            if (valueWithOnlyNumbers.length <= 1) {
-                template += "+7 (";
-            }
-            else if (valueWithOnlyNumbers.length >= 2 &&
-                valueWithOnlyNumbers.length <= 4) {
-                template = `+${countryCode} (${firstThree}`;
             }
             input.value = template;
         }

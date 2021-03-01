@@ -19,7 +19,8 @@ function init(input: HTMLInputElement, config: Tconfig) {
     notNumbers: /\D+/gm,
   };
 
-  let template = "";
+  let template = "+7 (___) ___-__-__";
+  input.value = template;
 
   new Promise((resolve) => {
     const resultArr = parseTemplate(mask);
@@ -38,11 +39,25 @@ function init(input: HTMLInputElement, config: Tconfig) {
     });
   });
 
+  // todo управляем кареткой
+  // https://learn.javascript.ru/selection-range
+  input.addEventListener("focus", () => {
+    console.log("focus");
+    // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
+    setTimeout(() => {
+      // мы можем задать любое выделение
+      // если начало и конец совпадают, курсор устанавливается на этом месте
+      input.selectionStart = input.selectionEnd = 4;
+    });
+  });
+
   input.addEventListener("input", (event: Event) => {
     if (event.target !== undefined && event.target !== null) {
-      const value = (event.target as HTMLInputElement).value;
+      const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
       const valueWithOnlyNumbers = value.replace(/\D/g, "");
+
+      console.log(value);
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -53,12 +68,12 @@ function init(input: HTMLInputElement, config: Tconfig) {
        * */
 
       // * NOTE Тут через slice Я контролирую количество символов в строке
-      const countryCode = valueWithOnlyNumbers.slice(0, 1);
+      // const countryCode = valueWithOnlyNumbers.slice(0, 1);
+      const countryCode = 7;
       const firstThree = valueWithOnlyNumbers.slice(1, 4);
       const secondThree = valueWithOnlyNumbers.slice(4, 7);
       const firstTwo = valueWithOnlyNumbers.slice(7, 9);
       const secondTwo = valueWithOnlyNumbers.slice(9, 11);
-      let template = "";
 
       switch (inputType) {
         case "insertText":
@@ -72,16 +87,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
           break;
         default:
           break;
-      }
-
-
-      if (valueWithOnlyNumbers.length <= 1) {
-        template += "+7 (";
-      } else if (
-        valueWithOnlyNumbers.length >= 2 &&
-        valueWithOnlyNumbers.length <= 4
-      ) {
-        template = `+${countryCode} (${firstThree}`;
       }
 
       input.value = template;
