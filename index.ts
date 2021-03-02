@@ -70,6 +70,7 @@ function init(input: HTMLInputElement, config: Tconfig) {
           // Печатаем
           const valueLength = valueOnlyNumbers.length;
 
+          // todo вынести в отдельную функцию
           if (valueLength <= 1) {
             result = `${codeTemplate} (${begin}`;
           } else if (valueLength >= 2 && valueLength <= 3) {
@@ -89,19 +90,20 @@ function init(input: HTMLInputElement, config: Tconfig) {
           // Удаляем
           const diff = state.value.replace(input.value, ""); // Нахожу символ, который удален
 
+
+          // todo ОБЩУЮ сделать проверку на число
           if (diff === " ") {
             // Удалили пробел
             input.value = input.value.slice(0, input.value.length - 1);
           }
 
+          // todo ОБЩУЮ сделать проверку на число
           if (diff === ")" || diff === "(" || diff === "-") {
             // Удалил символ
             input.value = input.value.slice(0, input.value.length - 1);
           }
 
-          state.value = input.value;
-          
-
+          state.value = input.value; // обновляю state.value после каждого удаления
           break;
         case "insertFromPaste":
           // вставляем копированное
