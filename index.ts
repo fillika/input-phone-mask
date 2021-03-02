@@ -3,51 +3,43 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 );
 
 type Tconfig = {
+  code: 7;
   mask: string;
 };
 
 const config: Tconfig = {
-  mask: "+7(999)999-99-99",
+  code: 7,
+  mask: "(999)999-99-99",
 };
 
 inputs.forEach((input) => init(input, config));
 
 function init(input: HTMLInputElement, config: Tconfig) {
-  const mask = config.mask;
+  const mask = config.mask; // todo распарсить маску
   const regexObj = {
     onlyNumbers: /\d+/gm,
     notNumbers: /\D+/gm,
   };
+  const codeTemplate = `+${config.code}`;
 
-  let template = "+7 (___) ___-__-__";
-  input.value = template;
+  const state = {
+    value: "", // ! тут хранится наше value
+  };
 
-  new Promise((resolve) => {
-    const resultArr = parseTemplate(mask);
-    console.log(resultArr);
+  parseTemplate(mask);
 
-    resolve(resultArr);
-  }).then((result) => {
-    result.forEach((element) => {
-      if (element === "+") {
-        return;
-      }
-
-      if (element !== "9" && element.length === 1) {
-        // Первый символ
-      }
-    });
-  });
-
-  // todo управляем кареткой
+  // * note управляем кареткой
   // https://learn.javascript.ru/selection-range
   input.addEventListener("focus", () => {
-    console.log("focus");
+    const value = input.value;
+
+    if (value.length === 0) {
+      input.value = `+${config.code} (`;
+    }
     // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
     setTimeout(() => {
-      // мы можем задать любое выделение
       // если начало и конец совпадают, курсор устанавливается на этом месте
-      input.selectionStart = input.selectionEnd = 4;
+      // input.selectionStart = input.selectionEnd = 4;
     });
   });
 
@@ -55,9 +47,8 @@ function init(input: HTMLInputElement, config: Tconfig) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
-      const valueWithOnlyNumbers = value.replace(/\D/g, "");
-
-      console.log(value);
+      const valueOnlyNumbers = value.replace(/\D/g, "");
+      let result = ``;
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -68,19 +59,49 @@ function init(input: HTMLInputElement, config: Tconfig) {
        * */
 
       // * NOTE Тут через slice Я контролирую количество символов в строке
-      // const countryCode = valueWithOnlyNumbers.slice(0, 1);
-      const countryCode = 7;
-      const firstThree = valueWithOnlyNumbers.slice(1, 4);
-      const secondThree = valueWithOnlyNumbers.slice(4, 7);
-      const firstTwo = valueWithOnlyNumbers.slice(7, 9);
-      const secondTwo = valueWithOnlyNumbers.slice(9, 11);
+      const begin = valueOnlyNumbers.slice(0, 1);
+      const firstThree = valueOnlyNumbers.slice(1, 4);
+      const secondThree = valueOnlyNumbers.slice(4, 7);
+      const firstTwo = valueOnlyNumbers.slice(7, 9);
+      const secondTwo = valueOnlyNumbers.slice(9, 11);
 
       switch (inputType) {
         case "insertText":
           // Печатаем
+          const valueLength = valueOnlyNumbers.length;
+
+          if (valueLength <= 1) {
+            result = `${codeTemplate} (${begin}`;
+          } else if (valueLength >= 2 && valueLength <= 3) {
+            result = `${codeTemplate} (${firstThree}`;
+          } else if (valueLength >= 4 && valueLength <= 7) {
+            result = `${codeTemplate} (${firstThree}) ${secondThree}`;
+          } else if (valueLength >= 8 && valueLength <= 9) {
+            result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}`;
+          } else if (valueLength >= 10) {
+            result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
+          }
+
+          input.value = state.value = result;
+          input.selectionStart = input.selectionEnd = result.length; // Управляем кареткой
           break;
         case "deleteContentBackward":
           // Удаляем
+          const diff = state.value.replace(input.value, ""); // Нахожу символ, который удален
+
+          if (diff === " ") {
+            // Удалили пробел
+            input.value = input.value.slice(0, input.value.length - 1);
+          }
+
+          if (diff === ")" || diff === "(" || diff === "-") {
+            // Удалил символ
+            input.value = input.value.slice(0, input.value.length - 1);
+          }
+
+          state.value = input.value;
+          
+
           break;
         case "insertFromPaste":
           // вставляем копированное
@@ -88,14 +109,12 @@ function init(input: HTMLInputElement, config: Tconfig) {
         default:
           break;
       }
-
-      input.value = template;
     }
   });
 }
 
 function parseTemplate(mask: string): string[] {
-  const regex = /(\d+)|(\D)/gm;
+  const regex = /(\d+)/gm;
   const result = [];
   let m;
 
@@ -108,5 +127,6 @@ function parseTemplate(mask: string): string[] {
     result.push(m[0]);
   }
 
+  console.log(result);
   return result;
 }
