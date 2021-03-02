@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/fillika/input-phone-mask/issues"
   },
-  "homepage": "https://github.com/fillika/input-phone-mask#readme"
+  "homepage": "https://github.com/fillika/input-phone-mask#readme",
+  "dependencies": {
+    "tslib": "^2.1.0"
+  }
 }

@@ -20,7 +20,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
     onlyNumbers: /\d+/gm,
     notNumbers: /\D+/gm,
   };
-  const codeTemplate = `+${config.code}`;
 
   const state = {
     value: "", // ! тут хранится наше value
@@ -48,7 +47,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
       const valueOnlyNumbers = value.replace(/\D/g, "");
-      let result = ``;
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -58,52 +56,45 @@ function init(input: HTMLInputElement, config: Tconfig) {
        * * insertFromPaste(вставка)
        * */
 
-      // * NOTE Тут через slice Я контролирую количество символов в строке
-      const begin = valueOnlyNumbers.slice(0, 1);
-      const firstThree = valueOnlyNumbers.slice(1, 4);
-      const secondThree = valueOnlyNumbers.slice(4, 7);
-      const firstTwo = valueOnlyNumbers.slice(7, 9);
-      const secondTwo = valueOnlyNumbers.slice(9, 11);
-
       switch (inputType) {
         case "insertText":
           // Печатаем
-          const valueLength = valueOnlyNumbers.length;
+          input.value = state.value = getPhoneWithTemplate(valueOnlyNumbers);
+          input.selectionStart = input.selectionEnd = getPhoneWithTemplate(
+            valueOnlyNumbers
+          ).length; // Управляем кареткой
 
-          // todo вынести в отдельную функцию
-          if (valueLength <= 1) {
-            result = `${codeTemplate} (${begin}`;
-          } else if (valueLength >= 2 && valueLength <= 3) {
-            result = `${codeTemplate} (${firstThree}`;
-          } else if (valueLength >= 4 && valueLength <= 7) {
-            result = `${codeTemplate} (${firstThree}) ${secondThree}`;
-          } else if (valueLength >= 8 && valueLength <= 9) {
-            result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}`;
-          } else if (valueLength >= 10) {
-            result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
-          }
-
-          input.value = state.value = result;
-          input.selectionStart = input.selectionEnd = result.length; // Управляем кареткой
           break;
         case "deleteContentBackward":
-          // Удаляем
+          /**
+           * todo Добавить определение удаление 1 символа или нескольких
+           * todo Сейчас удаление работает корректно для одного
+           */
           const diff = state.value.replace(input.value, ""); // Нахожу символ, который удален
+          const isNan = isNaN(Number(diff)) || diff === " ";
 
-
-          // todo ОБЩУЮ сделать проверку на число
-          if (diff === " ") {
-            // Удалили пробел
-            input.value = input.value.slice(0, input.value.length - 1);
-          }
-
-          // todo ОБЩУЮ сделать проверку на число
-          if (diff === ")" || diff === "(" || diff === "-") {
-            // Удалил символ
-            input.value = input.value.slice(0, input.value.length - 1);
+          if (isNan) {
+            input.value = remove(input.value);
           }
 
           state.value = input.value; // обновляю state.value после каждого удаления
+
+          function remove(value: string): string {
+            const newValue = value.slice(0, value.length - 1);
+            const diff = value.replace(newValue, "");
+            const isNan = isNaN(Number(diff)) || diff === " ";
+
+            console.log(newValue);
+
+            switch (isNan) {
+              case true:
+                return remove(newValue);
+
+              default:
+                return newValue;
+            }
+          }
+
           break;
         case "insertFromPaste":
           // вставляем копированное
@@ -130,5 +121,32 @@ function parseTemplate(mask: string): string[] {
   }
 
   console.log(result);
+  return result;
+}
+
+function getPhoneWithTemplate(value: string): string {
+  const codeTemplate = `+${config.code}`;
+  const valueLength = value.length;
+
+  // * NOTE Тут через slice Я контролирую количество символов в строке
+  const begin = value.slice(0, 1);
+  const firstThree = value.slice(1, 4);
+  const secondThree = value.slice(4, 7);
+  const firstTwo = value.slice(7, 9);
+  const secondTwo = value.slice(9, 11);
+  let result = ``;
+
+  if (valueLength <= 1) {
+    result = `${codeTemplate} (${begin}`;
+  } else if (valueLength >= 2 && valueLength <= 3) {
+    result = `${codeTemplate} (${firstThree}`;
+  } else if (valueLength >= 4 && valueLength <= 7) {
+    result = `${codeTemplate} (${firstThree}) ${secondThree}`;
+  } else if (valueLength >= 8 && valueLength <= 9) {
+    result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}`;
+  } else if (valueLength >= 10) {
+    result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
+  }
+
   return result;
 }
