@@ -7,6 +7,7 @@ const config = {
 inputs.forEach((input) => init(input, config));
 function init(input, config) {
     const mask = config.mask;
+    const codeTemplate = `+${config.code} (`;
     const regexObj = {
         onlyNumbers: /\d+/gm,
         notNumbers: /\D+/gm,
@@ -18,27 +19,28 @@ function init(input, config) {
     input.addEventListener("focus", () => {
         const value = input.value;
         if (value.length === 0) {
-            input.value = `+${config.code} (`;
+            input.value = codeTemplate;
+            setTimeout(() => {
+                input.selectionStart = input.selectionEnd = value.length;
+            });
         }
-        setTimeout(() => {
-        });
     });
     input.addEventListener("input", (event) => {
         if (event.target !== undefined && event.target !== null) {
             const { value } = event.target;
             const { inputType } = event;
-            const valueOnlyNumbers = value.replace(/\D/g, "");
+            const result = getPhoneWithTemplate(value);
             switch (inputType) {
                 case "insertText":
-                    input.value = state.value = getPhoneWithTemplate(valueOnlyNumbers);
-                    input.selectionStart = input.selectionEnd = getPhoneWithTemplate(valueOnlyNumbers).length;
+                    input.value = state.value = result;
+                    input.selectionStart = input.selectionEnd = result.length;
                     break;
                 case "deleteContentBackward":
-                    const diff = state.value.replace(input.value, "");
+                    const diff = state.value.replace(value, "");
                     if (diff.length === 1) {
                         const isNan = isNaN(Number(diff)) || diff === " ";
                         if (isNan) {
-                            input.value = removeChar(input.value);
+                            input.value = removeChar(value);
                         }
                     }
                     state.value = input.value;
@@ -55,6 +57,7 @@ function init(input, config) {
                     }
                     break;
                 case "insertFromPaste":
+                    input.value = state.value = result;
                     break;
                 default:
                     break;
@@ -77,12 +80,13 @@ function parseTemplate(mask) {
 }
 function getPhoneWithTemplate(value) {
     const codeTemplate = `+${config.code}`;
-    const valueLength = value.length;
-    const begin = value.slice(0, 1);
-    const firstThree = value.slice(1, 4);
-    const secondThree = value.slice(4, 7);
-    const firstTwo = value.slice(7, 9);
-    const secondTwo = value.slice(9, 11);
+    const valueOnlyNumbers = value.replace(/\D/g, "");
+    const valueLength = valueOnlyNumbers.length;
+    const begin = valueOnlyNumbers.slice(0, 1);
+    const firstThree = valueOnlyNumbers.slice(1, 4);
+    const secondThree = valueOnlyNumbers.slice(4, 7);
+    const firstTwo = valueOnlyNumbers.slice(7, 9);
+    const secondTwo = valueOnlyNumbers.slice(9, 11);
     let result = ``;
     if (valueLength <= 1) {
         result = `${codeTemplate} (${begin}`;
