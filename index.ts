@@ -9,25 +9,22 @@ type Tconfig = {
 
 const config: Tconfig = {
   countryCode: 7,
-  // code: '1-784', // todo - настроить прием вот таких кодов
-  mask: "(999)999-99-99",
+  // countryCode: "1-784",
+  mask: "(999) 999-99-99",
 };
+
+// ! GLOBAL
+const re = new RegExp(`\\+${config.countryCode}`, "gi");
+const codeTemplate = `+${config.countryCode}`;
 
 inputs.forEach((input) => init(input, config));
 
 function init(input: HTMLInputElement, config: Tconfig) {
-  const mask = config.mask; // todo распарсить маску
-  const codeTemplate = `+${config.countryCode} (`;
-  const regexObj = {
-    onlyNumbers: /\d+/gm,
-    notNumbers: /\D+/gm,
-  };
+  input.placeholder = "+" + config.countryCode;
 
   const state = {
     value: "", // ! тут хранится наше value
   };
-
-  parseTemplate(mask);
 
   // * note управляем кареткой
   // https://learn.javascript.ru/selection-range
@@ -36,10 +33,11 @@ function init(input: HTMLInputElement, config: Tconfig) {
 
     if (value.length === 0) {
       input.value = codeTemplate;
-
+      // todo разобраться с задержкой
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
-      setTimeout(() => {
+      const timeoutID = setTimeout(() => {
         input.selectionStart = input.selectionEnd = value.length; // Устанавливаем каретку на начало
+        clearTimeout(timeoutID);
       });
     }
   });
@@ -50,10 +48,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
       const { inputType } = event as InputEvent;
       const result = getPhoneWithTemplate(value); // Тут получаем результат, который нужно вводить в поле
 
-      // console.log(value.slice(codeTemplate.length).replace(/\D/g, ""));
-
-      console.log("value", value);
-
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
        * * insertText(буквы, цифры)
@@ -63,6 +57,7 @@ function init(input: HTMLInputElement, config: Tconfig) {
       switch (inputType) {
         case "insertText":
           input.value = state.value = result;
+          // todo настроить управление кареткой или решить как добавлять НЕ ЧИСЛА постепенно
           input.selectionStart = input.selectionEnd = result.length; // Управляем кареткой
 
           break;
@@ -80,6 +75,7 @@ function init(input: HTMLInputElement, config: Tconfig) {
 
           state.value = input.value; // обновляю state.value после каждого удаления
 
+          // todo вынести функцию в utils
           function removeChar(value: string): string {
             const newValue = value.slice(0, value.length - 1);
             const diff = value.replace(newValue, "");
@@ -96,11 +92,10 @@ function init(input: HTMLInputElement, config: Tconfig) {
 
           break;
         case "insertFromPaste":
-          /** NOTE:
+          /**
            * * при копировании пользователь может захватить кусок нашего шаблона (маски)
            * * чтобы это отсеять мы создаем регулярку, которая включает шаблон кода страны
            */
-          const re = new RegExp(`\\+${config.countryCode} \\(`, "gi");
           const valueWithoutCodetemplate = value.replace(re, "");
 
           input.value = state.value = getPhoneWithTemplate(
@@ -116,7 +111,7 @@ function init(input: HTMLInputElement, config: Tconfig) {
 }
 
 function parseTemplate(mask: string): string[] {
-  const regex = /(\d+)/gm;
+  const regex = /(\d+)|(\D+)|(\s+)/gim;
   const result = [];
   let m;
 
@@ -129,39 +124,38 @@ function parseTemplate(mask: string): string[] {
     result.push(m[0]);
   }
 
-  console.log(result);
-  return result;
+  return result.filter(Boolean);
 }
 
-/** Получаю готовый номер с маской
+/**
+ * Получаю готовый номер с маской
  * value - чистое, не форматированное
  */
 function getPhoneWithTemplate(value: string): string {
-  const codeTemplate = `+${config.countryCode} (`;
-  const valueOnlyNumbers = value.replace(/\D/g, ""); // Получаем числа
-  const valueLength = valueOnlyNumbers.length;
+  // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
+  const valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
+  const parsedArray = parseTemplate(config.mask);
+  let croppedResult = valueWithoutCodetemplate; // Эту переменную Я буду модифицировать
 
-  // * NOTE Тут через slice Я контролирую количество символов в строке
-  const begin = valueOnlyNumbers.slice(0, 1);
-  const firstThree = valueOnlyNumbers.slice(1, 4);
-  const secondThree = valueOnlyNumbers.slice(4, 7);
-  const firstTwo = valueOnlyNumbers.slice(7, 9);
-  const secondTwo = valueOnlyNumbers.slice(9, 11);
-  let result = ``;
+  console.log(parsedArray);
 
-  if (valueLength <= 1) {
-    result = `${codeTemplate}${begin}`;
-  } else if (valueLength >= 2 && valueLength <= 3) {
-    result = `${codeTemplate}${firstThree}`;
-  } else if (valueLength >= 4 && valueLength <= 7) {
-    result = `${codeTemplate}${firstThree}) ${secondThree}`;
-  } else if (valueLength >= 8 && valueLength <= 9) {
-    result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}`;
-  } else if (valueLength >= 10) {
-    result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
-  }
+  // todo Доработать формирование шаблона
+  /**
+   * * Как работает шаблон - мы берем parsedArray (прим. [" (", "987", ") ", "654", "-", "32", "-", "10"])
+   * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
+   * * своими числами. Потом мы соединим результат через join();
+   */
+  const result = parsedArray.map((item) => {
+    if (item === "" || item === " ") {
+      return item;
+    } else if (!isNaN(Number(item))) {
+      const result = croppedResult.slice(0, item.length);
+      croppedResult = croppedResult.slice(item.length);
+      return result;
+    } else {
+      return item;
+    }
+  });
 
-  console.log("RESULT FROM getPhone", result);
-
-  return result;
+  return codeTemplate + " " + result.join("");
 }

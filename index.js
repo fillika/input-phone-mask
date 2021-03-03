@@ -2,26 +2,23 @@
 const inputs = document.querySelectorAll('input[type="tel"]');
 const config = {
     countryCode: 7,
-    mask: "(999)999-99-99",
+    mask: "(999) 999-99-99",
 };
+const re = new RegExp(`\\+${config.countryCode}`, "gi");
+const codeTemplate = `+${config.countryCode}`;
 inputs.forEach((input) => init(input, config));
 function init(input, config) {
-    const mask = config.mask;
-    const codeTemplate = `+${config.countryCode} (`;
-    const regexObj = {
-        onlyNumbers: /\d+/gm,
-        notNumbers: /\D+/gm,
-    };
+    input.placeholder = "+" + config.countryCode;
     const state = {
         value: "",
     };
-    parseTemplate(mask);
     input.addEventListener("focus", () => {
         const value = input.value;
         if (value.length === 0) {
             input.value = codeTemplate;
-            setTimeout(() => {
+            const timeoutID = setTimeout(() => {
                 input.selectionStart = input.selectionEnd = value.length;
+                clearTimeout(timeoutID);
             });
         }
     });
@@ -30,7 +27,6 @@ function init(input, config) {
             const { value } = event.target;
             const { inputType } = event;
             const result = getPhoneWithTemplate(value);
-            console.log("value", value);
             switch (inputType) {
                 case "insertText":
                     input.value = state.value = result;
@@ -58,7 +54,6 @@ function init(input, config) {
                     }
                     break;
                 case "insertFromPaste":
-                    const re = new RegExp(`\\+${config.countryCode} \\(`, "gi");
                     const valueWithoutCodetemplate = value.replace(re, "");
                     input.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
                     break;
@@ -69,7 +64,7 @@ function init(input, config) {
     });
 }
 function parseTemplate(mask) {
-    const regex = /(\d+)/gm;
+    const regex = /(\d+)|(\D+)|(\s+)/gim;
     const result = [];
     let m;
     while ((m = regex.exec(mask)) !== null) {
@@ -78,35 +73,26 @@ function parseTemplate(mask) {
         }
         result.push(m[0]);
     }
-    console.log(result);
-    return result;
+    return result.filter(Boolean);
 }
 function getPhoneWithTemplate(value) {
-    const codeTemplate = `+${config.countryCode} (`;
-    const valueOnlyNumbers = value.replace(/\D/g, "");
-    const valueLength = valueOnlyNumbers.length;
-    const begin = valueOnlyNumbers.slice(0, 1);
-    const firstThree = valueOnlyNumbers.slice(1, 4);
-    const secondThree = valueOnlyNumbers.slice(4, 7);
-    const firstTwo = valueOnlyNumbers.slice(7, 9);
-    const secondTwo = valueOnlyNumbers.slice(9, 11);
-    let result = ``;
-    if (valueLength <= 1) {
-        result = `${codeTemplate}${begin}`;
-    }
-    else if (valueLength >= 2 && valueLength <= 3) {
-        result = `${codeTemplate}${firstThree}`;
-    }
-    else if (valueLength >= 4 && valueLength <= 7) {
-        result = `${codeTemplate}${firstThree}) ${secondThree}`;
-    }
-    else if (valueLength >= 8 && valueLength <= 9) {
-        result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}`;
-    }
-    else if (valueLength >= 10) {
-        result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
-    }
-    console.log("RESULT FROM getPhone", result);
-    return result;
+    const valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
+    const parsedArray = parseTemplate(config.mask);
+    let croppedResult = valueWithoutCodetemplate;
+    console.log(parsedArray);
+    const result = parsedArray.map((item) => {
+        if (item === "" || item === " ") {
+            return item;
+        }
+        else if (!isNaN(Number(item))) {
+            const result = croppedResult.slice(0, item.length);
+            croppedResult = croppedResult.slice(item.length);
+            return result;
+        }
+        else {
+            return item;
+        }
+    });
+    return codeTemplate + " " + result.join("");
 }
 //# sourceMappingURL=index.js.map
