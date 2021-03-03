@@ -3,12 +3,12 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 );
 
 type Tconfig = {
-  code: number | string;
+  countryCode: number | string;
   mask: string;
 };
 
 const config: Tconfig = {
-  code: 7,
+  countryCode: 7,
   // code: '1-784', // todo - настроить прием вот таких кодов
   mask: "(999)999-99-99",
 };
@@ -17,7 +17,7 @@ inputs.forEach((input) => init(input, config));
 
 function init(input: HTMLInputElement, config: Tconfig) {
   const mask = config.mask; // todo распарсить маску
-  const codeTemplate = `+${config.code} (`;
+  const codeTemplate = `+${config.countryCode} (`;
   const regexObj = {
     onlyNumbers: /\d+/gm,
     notNumbers: /\D+/gm,
@@ -51,6 +51,8 @@ function init(input: HTMLInputElement, config: Tconfig) {
       const result = getPhoneWithTemplate(value); // Тут получаем результат, который нужно вводить в поле
 
       // console.log(value.slice(codeTemplate.length).replace(/\D/g, ""));
+
+      console.log("value", value);
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -94,8 +96,16 @@ function init(input: HTMLInputElement, config: Tconfig) {
 
           break;
         case "insertFromPaste":
-          // вставляем копированное
-          input.value = state.value = result;
+          /** NOTE:
+           * * при копировании пользователь может захватить кусок нашего шаблона (маски)
+           * * чтобы это отсеять мы создаем регулярку, которая включает шаблон кода страны
+           */
+          const re = new RegExp(`\\+${config.countryCode} \\(`, "gi");
+          const valueWithoutCodetemplate = value.replace(re, "");
+
+          input.value = state.value = getPhoneWithTemplate(
+            valueWithoutCodetemplate
+          );
 
           break;
         default:
@@ -127,7 +137,7 @@ function parseTemplate(mask: string): string[] {
  * value - чистое, не форматированное
  */
 function getPhoneWithTemplate(value: string): string {
-  const codeTemplate = `+${config.code}`;
+  const codeTemplate = `+${config.countryCode} (`;
   const valueOnlyNumbers = value.replace(/\D/g, ""); // Получаем числа
   const valueLength = valueOnlyNumbers.length;
 
@@ -140,16 +150,18 @@ function getPhoneWithTemplate(value: string): string {
   let result = ``;
 
   if (valueLength <= 1) {
-    result = `${codeTemplate} (${begin}`;
+    result = `${codeTemplate}${begin}`;
   } else if (valueLength >= 2 && valueLength <= 3) {
-    result = `${codeTemplate} (${firstThree}`;
+    result = `${codeTemplate}${firstThree}`;
   } else if (valueLength >= 4 && valueLength <= 7) {
-    result = `${codeTemplate} (${firstThree}) ${secondThree}`;
+    result = `${codeTemplate}${firstThree}) ${secondThree}`;
   } else if (valueLength >= 8 && valueLength <= 9) {
-    result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}`;
+    result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}`;
   } else if (valueLength >= 10) {
-    result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
+    result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
   }
+
+  console.log("RESULT FROM getPhone", result);
 
   return result;
 }

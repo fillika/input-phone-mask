@@ -1,13 +1,13 @@
 "use strict";
 const inputs = document.querySelectorAll('input[type="tel"]');
 const config = {
-    code: 7,
+    countryCode: 7,
     mask: "(999)999-99-99",
 };
 inputs.forEach((input) => init(input, config));
 function init(input, config) {
     const mask = config.mask;
-    const codeTemplate = `+${config.code} (`;
+    const codeTemplate = `+${config.countryCode} (`;
     const regexObj = {
         onlyNumbers: /\d+/gm,
         notNumbers: /\D+/gm,
@@ -30,6 +30,7 @@ function init(input, config) {
             const { value } = event.target;
             const { inputType } = event;
             const result = getPhoneWithTemplate(value);
+            console.log("value", value);
             switch (inputType) {
                 case "insertText":
                     input.value = state.value = result;
@@ -57,7 +58,9 @@ function init(input, config) {
                     }
                     break;
                 case "insertFromPaste":
-                    input.value = state.value = result;
+                    const re = new RegExp(`\\+${config.countryCode} \\(`, "gi");
+                    const valueWithoutCodetemplate = value.replace(re, "");
+                    input.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
                     break;
                 default:
                     break;
@@ -79,7 +82,7 @@ function parseTemplate(mask) {
     return result;
 }
 function getPhoneWithTemplate(value) {
-    const codeTemplate = `+${config.code}`;
+    const codeTemplate = `+${config.countryCode} (`;
     const valueOnlyNumbers = value.replace(/\D/g, "");
     const valueLength = valueOnlyNumbers.length;
     const begin = valueOnlyNumbers.slice(0, 1);
@@ -89,20 +92,21 @@ function getPhoneWithTemplate(value) {
     const secondTwo = valueOnlyNumbers.slice(9, 11);
     let result = ``;
     if (valueLength <= 1) {
-        result = `${codeTemplate} (${begin}`;
+        result = `${codeTemplate}${begin}`;
     }
     else if (valueLength >= 2 && valueLength <= 3) {
-        result = `${codeTemplate} (${firstThree}`;
+        result = `${codeTemplate}${firstThree}`;
     }
     else if (valueLength >= 4 && valueLength <= 7) {
-        result = `${codeTemplate} (${firstThree}) ${secondThree}`;
+        result = `${codeTemplate}${firstThree}) ${secondThree}`;
     }
     else if (valueLength >= 8 && valueLength <= 9) {
-        result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}`;
+        result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}`;
     }
     else if (valueLength >= 10) {
-        result = `${codeTemplate} (${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
+        result = `${codeTemplate}${firstThree}) ${secondThree}-${firstTwo}-${secondTwo}`;
     }
+    console.log("RESULT FROM getPhone", result);
     return result;
 }
 //# sourceMappingURL=index.js.map
