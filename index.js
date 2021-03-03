@@ -35,19 +35,20 @@ function init(input, config) {
                     break;
                 case "deleteContentBackward":
                     const diff = state.value.replace(input.value, "");
-                    const isNan = isNaN(Number(diff)) || diff === " ";
-                    if (isNan) {
-                        input.value = remove(input.value);
+                    if (diff.length === 1) {
+                        const isNan = isNaN(Number(diff)) || diff === " ";
+                        if (isNan) {
+                            input.value = removeChar(input.value);
+                        }
                     }
                     state.value = input.value;
-                    function remove(value) {
+                    function removeChar(value) {
                         const newValue = value.slice(0, value.length - 1);
                         const diff = value.replace(newValue, "");
                         const isNan = isNaN(Number(diff)) || diff === " ";
-                        console.log(newValue);
                         switch (isNan) {
                             case true:
-                                return remove(newValue);
+                                return removeChar(newValue);
                             default:
                                 return newValue;
                         }

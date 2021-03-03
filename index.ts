@@ -66,29 +66,27 @@ function init(input: HTMLInputElement, config: Tconfig) {
 
           break;
         case "deleteContentBackward":
-          /**
-           * todo Добавить определение удаление 1 символа или нескольких
-           * todo Сейчас удаление работает корректно для одного
-           */
           const diff = state.value.replace(input.value, ""); // Нахожу символ, который удален
-          const isNan = isNaN(Number(diff)) || diff === " ";
 
-          if (isNan) {
-            input.value = remove(input.value);
+          // note если удаляем 1 не более 1 символа
+          if (diff.length === 1) {
+            const isNan = isNaN(Number(diff)) || diff === " ";
+
+            if (isNan) {
+              input.value = removeChar(input.value);
+            }
           }
 
           state.value = input.value; // обновляю state.value после каждого удаления
 
-          function remove(value: string): string {
+          function removeChar(value: string): string {
             const newValue = value.slice(0, value.length - 1);
             const diff = value.replace(newValue, "");
             const isNan = isNaN(Number(diff)) || diff === " ";
 
-            console.log(newValue);
-
             switch (isNan) {
               case true:
-                return remove(newValue);
+                return removeChar(newValue);
 
               default:
                 return newValue;
@@ -124,6 +122,7 @@ function parseTemplate(mask: string): string[] {
   return result;
 }
 
+/** Получаю готовый номер с маской */
 function getPhoneWithTemplate(value: string): string {
   const codeTemplate = `+${config.code}`;
   const valueLength = value.length;
