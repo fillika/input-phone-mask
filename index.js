@@ -12,8 +12,11 @@ function Init(input, config) {
     const state = {
         value: "",
     };
-    if (config.placeholder) {
-        input.placeholder = "+" + config.countryCode;
+    if (typeof config.placeholder === 'boolean' && config.placeholder) {
+        input.placeholder = '+' + config.countryCode.toString();
+    }
+    else if (typeof config.placeholder === 'string') {
+        input.placeholder = config.placeholder;
     }
     input.addEventListener("focus", () => {
         const value = input.value;
@@ -65,6 +68,7 @@ function parseTemplate(mask) {
         }
         result.push(m[0]);
     }
+    console.log(result.filter(Boolean));
     return result.filter(Boolean);
 }
 function getPhoneWithTemplate(value) {

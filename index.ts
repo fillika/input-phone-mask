@@ -5,7 +5,7 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 type Tconfig = {
   countryCode: number | string;
   mask: string;
-  placeholder?: boolean;
+  placeholder?: boolean | string;
 };
 
 const config: Tconfig = {
@@ -26,8 +26,10 @@ function Init(input: HTMLInputElement, config: Tconfig) {
     value: "", // ! тут хранится наше value
   };
 
-  if (config.placeholder) {
-    input.placeholder = "+" + config.countryCode;
+  if (typeof config.placeholder === 'boolean' && config.placeholder) {
+    input.placeholder = '+' + config.countryCode.toString();
+  } else if (typeof config.placeholder === 'string') {
+    input.placeholder = config.placeholder;
   }
 
   // * note управляем кареткой
@@ -114,6 +116,9 @@ function parseTemplate(mask: string): string[] {
 
     result.push(m[0]);
   }
+
+  console.log(result.filter(Boolean));
+  
 
   return result.filter(Boolean);
 }
