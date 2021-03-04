@@ -1,15 +1,15 @@
 "use strict";
-const inputs = document.querySelectorAll('input[type="tel"]');
-const config = {
+var inputs = document.querySelectorAll('input[type="tel"]');
+var config = {
     countryCode: "1-784",
-    mask: "(999) 999-99-99",
+    mask: "([9]99) 4 44 44",
     placeholder: true,
 };
-const re = new RegExp(`\\+${config.countryCode}`, "gi");
-const codeTemplate = `+${config.countryCode}`;
-inputs.forEach((input) => Init(input, config));
-function Init(input, config) {
-    const state = {
+var re = new RegExp("\\+" + config.countryCode, "gi");
+var codeTemplate = "+" + config.countryCode;
+inputs.forEach(function (input) { return InitEasyMask(input, config); });
+function InitEasyMask(input, config) {
+    var state = {
         value: "",
     };
     if (typeof config.placeholder === "boolean" && config.placeholder) {
@@ -21,29 +21,30 @@ function Init(input, config) {
     input.addEventListener("focus", inputEventFocus.bind(input));
     input.addEventListener("input", inputEventInput.bind(input));
     function inputEventFocus() {
-        const value = this.value;
+        var _this = this;
+        var value = this.value;
         if (value.length === 0) {
             this.value = codeTemplate;
-            const timeoutID = setTimeout(() => {
-                this.selectionStart = this.selectionEnd = this.value.length;
-                clearTimeout(timeoutID);
+            var timeoutID_1 = setTimeout(function () {
+                _this.selectionStart = _this.selectionEnd = _this.value.length;
+                clearTimeout(timeoutID_1);
             }, 10);
         }
     }
     function inputEventInput(event) {
         if (event.target !== undefined && event.target !== null) {
-            const { value } = event.target;
-            const { inputType } = event;
-            const result = getPhoneWithTemplate(value);
+            var value = event.target.value;
+            var inputType = event.inputType;
+            var result = getPhoneWithTemplate(value);
             switch (inputType) {
                 case "insertText":
                     this.value = state.value = result;
                     this.selectionStart = this.selectionEnd = result.length;
                     break;
                 case "deleteContentBackward":
-                    const diff = state.value.replace(value, "");
+                    var diff = state.value.replace(value, "");
                     if (diff.length === 1) {
-                        const isNan = isNaN(Number(diff)) || diff === " ";
+                        var isNan = isNaN(Number(diff)) || diff === " ";
                         if (isNan) {
                             this.value = removeChar(value);
                         }
@@ -51,7 +52,7 @@ function Init(input, config) {
                     state.value = this.value;
                     break;
                 case "insertFromPaste":
-                    const valueWithoutCodetemplate = value.replace(re, "");
+                    var valueWithoutCodetemplate = value.replace(re, "");
                     this.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
                     break;
                 default:
@@ -61,34 +62,34 @@ function Init(input, config) {
     }
 }
 function parseTemplate(mask) {
-    const regex = /(\d+)|(\D+)|(\s+)/gim;
-    const result = [];
-    let m;
+    var regExpNumbersGroup = /(\[\d+\]\+)|(\[\d+\])/gm;
+    var regex = /(\d+)|(\D+)|(\s+)/gim;
+    var result = [];
+    var m;
     while ((m = regex.exec(mask)) !== null) {
         if (m.index === regex.lastIndex) {
             regex.lastIndex++;
         }
         result.push(m[0]);
     }
-    console.log(result.filter(Boolean));
     return result.filter(Boolean);
 }
 function getPhoneWithTemplate(value) {
-    const valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
-    const parsedArray = parseTemplate(config.mask);
-    const result = createNumber(parsedArray, valueWithoutCodetemplate);
-    return `${codeTemplate} ${result}`;
+    var valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
+    var parsedArray = parseTemplate(config.mask);
+    var result = createNumber(parsedArray, valueWithoutCodetemplate);
+    return codeTemplate + " " + result;
 }
 function createNumber(parsedArray, currentValue) {
-    let croppedResult = currentValue;
+    var croppedResult = currentValue;
     return parsedArray
-        .map((item) => {
+        .map(function (item) {
         if (croppedResult.length !== 0) {
             if (item === "" || item === " ") {
                 return item;
             }
             else if (!isNaN(Number(item))) {
-                const result = croppedResult.slice(0, item.length);
+                var result = croppedResult.slice(0, item.length);
                 croppedResult = croppedResult.slice(item.length);
                 return result;
             }
@@ -100,9 +101,9 @@ function createNumber(parsedArray, currentValue) {
         .join("");
 }
 function removeChar(value) {
-    const newValue = value.slice(0, value.length - 1);
-    const diff = value.replace(newValue, "");
-    const isNan = isNaN(Number(diff)) || diff === " ";
+    var newValue = value.slice(0, value.length - 1);
+    var diff = value.replace(newValue, "");
+    var isNan = isNaN(Number(diff)) || diff === " ";
     switch (isNan) {
         case true:
             return removeChar(newValue);
@@ -110,4 +111,10 @@ function removeChar(value) {
             return newValue;
     }
 }
+function searchRegExpInMask() {
+    var mask = "([9]99) [999]-99-99";
+    var maskRegExp = mask.replace(/\D/gmi, "");
+    console.log(maskRegExp);
+}
+searchRegExpInMask();
 //# sourceMappingURL=index.js.map

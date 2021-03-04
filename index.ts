@@ -1,3 +1,7 @@
+// TODO Глобальные
+// todo метод destroy
+// todo метод reinit();
+
 const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
   'input[type="tel"]'
 );
@@ -11,7 +15,7 @@ type Tconfig = {
 const config: Tconfig = {
   // countryCode: 7,
   countryCode: "1-784",
-  mask: "(999) 999-99-99",
+  mask: "([9]99) 4 44 44",
   placeholder: true,
 };
 
@@ -19,9 +23,10 @@ const config: Tconfig = {
 const re = new RegExp(`\\+${config.countryCode}`, "gi");
 const codeTemplate = `+${config.countryCode}`;
 
-inputs.forEach((input) => Init(input, config));
+// todo Мб переписать под класс?
+inputs.forEach((input) => InitEasyMask(input, config));
 
-function Init(input: HTMLInputElement, config: Tconfig) {
+function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
   const state = {
     value: "", // ! тут хранится наше value
   };
@@ -106,6 +111,14 @@ function Init(input: HTMLInputElement, config: Tconfig) {
  * * парсинг входящего шаблона (маски)
  */
 function parseTemplate(mask: string): string[] {
+  // todo понять, прислали регулярку или нет
+
+  const regExpNumbersGroup = /(\[\d+\]\+)|(\[\d+\])/gm; // Целое число, например [999]+ или [99]
+  /**
+   * * Тут Я могу 9 принять как ЛЮБОЕ число.
+   * todo Можно заменять 9 на \d. Например [789]+ ==> [78\d]+. Из этого мне надо формировать регулярку, по которой проверять результат
+   */
+
   const regex = /(\d+)|(\D+)|(\s+)/gim;
   const result = [];
   let m;
@@ -118,8 +131,6 @@ function parseTemplate(mask: string): string[] {
 
     result.push(m[0]);
   }
-
-  console.log(result.filter(Boolean));
 
   return result.filter(Boolean);
 }
@@ -179,3 +190,14 @@ function removeChar(value: string): string {
       return newValue;
   }
 }
+
+// todo функции поиска регулярки
+function searchRegExpInMask() {
+  // Ищу все, что подходит под [9] или [999]
+  const mask = "([9]99) [999]-99-99";
+  const maskRegExp = mask.replace(/\D/gmi, "");
+
+  console.log(maskRegExp);
+}
+
+searchRegExpInMask();
