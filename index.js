@@ -12,51 +12,53 @@ function Init(input, config) {
     const state = {
         value: "",
     };
-    if (typeof config.placeholder === 'boolean' && config.placeholder) {
-        input.placeholder = '+' + config.countryCode.toString();
+    if (typeof config.placeholder === "boolean" && config.placeholder) {
+        input.placeholder = "+" + config.countryCode.toString();
     }
-    else if (typeof config.placeholder === 'string') {
+    else if (typeof config.placeholder === "string") {
         input.placeholder = config.placeholder;
     }
-    input.addEventListener("focus", () => {
-        const value = input.value;
+    input.addEventListener("focus", inputEventFocus.bind(input));
+    input.addEventListener("input", inputEventInput.bind(input));
+    function inputEventFocus() {
+        const value = this.value;
         if (value.length === 0) {
-            input.value = codeTemplate;
+            this.value = codeTemplate;
             const timeoutID = setTimeout(() => {
-                input.selectionStart = input.selectionEnd = value.length;
+                this.selectionStart = this.selectionEnd = this.value.length;
                 clearTimeout(timeoutID);
-            });
+            }, 10);
         }
-    });
-    input.addEventListener("input", (event) => {
+    }
+    function inputEventInput(event) {
         if (event.target !== undefined && event.target !== null) {
             const { value } = event.target;
             const { inputType } = event;
             const result = getPhoneWithTemplate(value);
             switch (inputType) {
                 case "insertText":
-                    input.value = state.value = result;
-                    input.selectionStart = input.selectionEnd = result.length;
+                    this.value = state.value = result;
+                    this.selectionStart = this.selectionEnd = result.length;
                     break;
                 case "deleteContentBackward":
                     const diff = state.value.replace(value, "");
                     if (diff.length === 1) {
                         const isNan = isNaN(Number(diff)) || diff === " ";
                         if (isNan) {
-                            input.value = removeChar(value);
+                            this.value = removeChar(value);
                         }
                     }
-                    state.value = input.value;
+                    state.value = this.value;
                     break;
                 case "insertFromPaste":
                     const valueWithoutCodetemplate = value.replace(re, "");
-                    input.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
+                    this.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
                     break;
                 default:
                     break;
             }
         }
-    });
+    }
 }
 function parseTemplate(mask) {
     const regex = /(\d+)|(\D+)|(\s+)/gim;

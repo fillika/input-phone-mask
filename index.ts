@@ -26,29 +26,31 @@ function Init(input: HTMLInputElement, config: Tconfig) {
     value: "", // ! тут хранится наше value
   };
 
-  if (typeof config.placeholder === 'boolean' && config.placeholder) {
-    input.placeholder = '+' + config.countryCode.toString();
-  } else if (typeof config.placeholder === 'string') {
+  if (typeof config.placeholder === "boolean" && config.placeholder) {
+    input.placeholder = "+" + config.countryCode.toString();
+  } else if (typeof config.placeholder === "string") {
     input.placeholder = config.placeholder;
   }
+  // * note вешаем слушателей
+  input.addEventListener("focus", inputEventFocus.bind(input));
+  input.addEventListener("input", inputEventInput.bind(input));
 
   // * note управляем кареткой
   // https://learn.javascript.ru/selection-range
-  input.addEventListener("focus", () => {
-    const value = input.value;
+  function inputEventFocus(this: HTMLInputElement) {
+    const value = this.value;
 
     if (value.length === 0) {
-      input.value = codeTemplate;
-      // todo разобраться с задержкой
+      this.value = codeTemplate;
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
       const timeoutID = setTimeout(() => {
-        input.selectionStart = input.selectionEnd = value.length; // Устанавливаем каретку на начало
+        this.selectionStart = this.selectionEnd = this.value.length; // Устанавливаем каретку на начало
         clearTimeout(timeoutID);
-      });
+      }, 10);
     }
-  });
+  }
 
-  input.addEventListener("input", (event: Event) => {
+  function inputEventInput(this: HTMLInputElement, event: Event) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
@@ -62,8 +64,8 @@ function Init(input: HTMLInputElement, config: Tconfig) {
        * */
       switch (inputType) {
         case "insertText":
-          input.value = state.value = result;
-          input.selectionStart = input.selectionEnd = result.length; // Управляем кареткой
+          this.value = state.value = result;
+          this.selectionStart = this.selectionEnd = result.length; // Управляем кареткой
 
           break;
         case "deleteContentBackward":
@@ -74,11 +76,11 @@ function Init(input: HTMLInputElement, config: Tconfig) {
             const isNan = isNaN(Number(diff)) || diff === " ";
 
             if (isNan) {
-              input.value = removeChar(value);
+              this.value = removeChar(value);
             }
           }
 
-          state.value = input.value; // обновляю state.value после каждого удаления
+          state.value = this.value; // обновляю state.value после каждого удаления
 
           break;
         case "insertFromPaste":
@@ -88,7 +90,7 @@ function Init(input: HTMLInputElement, config: Tconfig) {
            */
           const valueWithoutCodetemplate = value.replace(re, "");
 
-          input.value = state.value = getPhoneWithTemplate(
+          this.value = state.value = getPhoneWithTemplate(
             valueWithoutCodetemplate
           );
 
@@ -97,7 +99,7 @@ function Init(input: HTMLInputElement, config: Tconfig) {
           break;
       }
     }
-  });
+  }
 }
 
 /**
@@ -118,7 +120,6 @@ function parseTemplate(mask: string): string[] {
   }
 
   console.log(result.filter(Boolean));
-  
 
   return result.filter(Boolean);
 }
