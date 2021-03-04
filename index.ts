@@ -5,26 +5,30 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 type Tconfig = {
   countryCode: number | string;
   mask: string;
+  placeholder?: boolean;
 };
 
 const config: Tconfig = {
-  countryCode: 7,
-  // countryCode: "1-784",
+  // countryCode: 7,
+  countryCode: "1-784",
   mask: "(999) 999-99-99",
+  placeholder: true,
 };
 
 // ! GLOBAL
 const re = new RegExp(`\\+${config.countryCode}`, "gi");
 const codeTemplate = `+${config.countryCode}`;
 
-inputs.forEach((input) => init(input, config));
+inputs.forEach((input) => Init(input, config));
 
-function init(input: HTMLInputElement, config: Tconfig) {
-  input.placeholder = "+" + config.countryCode;
-
+function Init(input: HTMLInputElement, config: Tconfig) {
   const state = {
     value: "", // ! тут хранится наше value
   };
+
+  if (config.placeholder) {
+    input.placeholder = "+" + config.countryCode;
+  }
 
   // * note управляем кареткой
   // https://learn.javascript.ru/selection-range
@@ -57,7 +61,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
       switch (inputType) {
         case "insertText":
           input.value = state.value = result;
-          // todo настроить управление кареткой или решить как добавлять НЕ ЧИСЛА постепенно
           input.selectionStart = input.selectionEnd = result.length; // Управляем кареткой
 
           break;
@@ -74,21 +77,6 @@ function init(input: HTMLInputElement, config: Tconfig) {
           }
 
           state.value = input.value; // обновляю state.value после каждого удаления
-
-          // todo вынести функцию в utils
-          function removeChar(value: string): string {
-            const newValue = value.slice(0, value.length - 1);
-            const diff = value.replace(newValue, "");
-            const isNan = isNaN(Number(diff)) || diff === " ";
-
-            switch (isNan) {
-              case true:
-                return removeChar(newValue);
-
-              default:
-                return newValue;
-            }
-          }
 
           break;
         case "insertFromPaste":
@@ -110,6 +98,9 @@ function init(input: HTMLInputElement, config: Tconfig) {
   });
 }
 
+/**
+ * * парсинг входящего шаблона (маски)
+ */
 function parseTemplate(mask: string): string[] {
   const regex = /(\d+)|(\D+)|(\s+)/gim;
   const result = [];
@@ -135,27 +126,50 @@ function getPhoneWithTemplate(value: string): string {
   // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
   const valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
   const parsedArray = parseTemplate(config.mask);
-  let croppedResult = valueWithoutCodetemplate; // Эту переменную Я буду модифицировать
 
-  console.log(parsedArray);
+  const result = createNumber(parsedArray, valueWithoutCodetemplate);
+  return `${codeTemplate} ${result}`;
+}
 
-  // todo Доработать формирование шаблона
-  /**
-   * * Как работает шаблон - мы берем parsedArray (прим. [" (", "987", ") ", "654", "-", "32", "-", "10"])
-   * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
-   * * своими числами. Потом мы соединим результат через join();
-   */
-  const result = parsedArray.map((item) => {
-    if (item === "" || item === " ") {
-      return item;
-    } else if (!isNaN(Number(item))) {
-      const result = croppedResult.slice(0, item.length);
-      croppedResult = croppedResult.slice(item.length);
-      return result;
-    } else {
-      return item;
-    }
-  });
+/**
+ * * Создаем правильный номер с использованием шаблона
+ * * Как работает шаблон - мы берем parsedArray (пример. [" (", "987", ") ", "654", "-", "32", "-", "10"])
+ * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
+ * * своими числами. Потом мы соединим результат через join();
+ */
+function createNumber(parsedArray: string[], currentValue: string): string {
+  let croppedResult = currentValue;
 
-  return codeTemplate + " " + result.join("");
+  return parsedArray
+    .map((item) => {
+      // Проверка на длину. Если длина 0 - то мы не печатаем следующие символы
+      // Например не появятся лишние тире, скобки или еще что-то
+      if (croppedResult.length !== 0) {
+        if (item === "" || item === " ") {
+          return item;
+        } else if (!isNaN(Number(item))) {
+          const result = croppedResult.slice(0, item.length);
+          croppedResult = croppedResult.slice(item.length);
+          return result;
+        } else {
+          return item;
+        }
+      }
+    })
+    .join("");
+}
+
+// todo вынести функцию в utils
+function removeChar(value: string): string {
+  const newValue = value.slice(0, value.length - 1);
+  const diff = value.replace(newValue, "");
+  const isNan = isNaN(Number(diff)) || diff === " ";
+
+  switch (isNan) {
+    case true:
+      return removeChar(newValue);
+
+    default:
+      return newValue;
+  }
 }
