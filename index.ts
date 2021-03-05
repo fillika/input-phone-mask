@@ -260,7 +260,11 @@ function searchRegExpInMask(mask: string) {
       const re = /(.)(?=.*\1)/gm; // Поиск повторяющихся чисел
       const resultWithoutDuplicates = numberInsideBrackets.replace(re, "");
 
-      regExpConfig.regExp = `[${resultWithoutDuplicates}]{1,${length}}`;
+      /**
+       * [9]+(?![0-9])
+       * [123]+(?![0-9])
+       */
+      regExpConfig.regExp = `[${resultWithoutDuplicates}]+(?![0-9])`;
     } else {
       regExpConfig.regExp = `[${numberInsideBrackets}]`;
     }

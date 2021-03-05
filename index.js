@@ -158,7 +158,7 @@ function searchRegExpInMask(mask) {
         if (length >= 2) {
             var re_2 = /(.)(?=.*\1)/gm;
             var resultWithoutDuplicates = numberInsideBrackets.replace(re_2, "");
-            regExpConfig.regExp = "[" + resultWithoutDuplicates + "]{1," + length + "}";
+            regExpConfig.regExp = "[" + resultWithoutDuplicates + "]+(?![0-9])";
         }
         else {
             regExpConfig.regExp = "[" + numberInsideBrackets + "]";
