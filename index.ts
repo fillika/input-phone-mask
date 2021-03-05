@@ -9,7 +9,7 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 const config: Tconfig = {
   countryCode: 7,
   // countryCode: "1-784",
-  mask: "([9]99) [999]-99-94",
+  mask: "([9]99) [123]-99-94",
   placeholder: true,
 };
 
@@ -165,17 +165,19 @@ function createNumber(
         const re = new RegExp(shiftedEl?.regExp, "gi");
         const isValid = resultNumber.match(re);
 
-        console.log("re", re);
-        console.log("resultNumber (то, что надо проверять)", resultNumber);
-        console.log("isValid", isValid);
+        croppedResult = croppedResult.slice(item.length);
+        console.log("resultNumber CORRECT", resultNumber);
+        console.log("currentValue CORRECT", currentValue);
 
         if (isValid === null) {
-          console.log("Это НУЛ");
-          break;
+          /**
+           * Тут Я обрезаю последнее число, если оно не соответствует шаблону.
+           * Если это одна цифра - то Я вставд. пустую строку
+           */
+          result.push(resultNumber.slice(0, resultNumber.length - 1));
+        } else {
+          result.push(resultNumber);
         }
-
-        croppedResult = croppedResult.slice(item.length);
-        result.push(resultNumber);
       } else {
         result.push(item.replace(/\[|\]/, "")); // Убираю квадратные скобки
       }

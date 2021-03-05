@@ -2,7 +2,7 @@
 var inputs = document.querySelectorAll('input[type="tel"]');
 var config = {
     countryCode: 7,
-    mask: "([9]99) [999]-99-94",
+    mask: "([9]99) [123]-99-94",
     placeholder: true,
 };
 var re = new RegExp("\\+" + config.countryCode, "gi");
@@ -95,15 +95,15 @@ function createNumber(parsedArray, currentValue, state) {
                 var shiftedEl = croppedMaskTemplated.shift();
                 var re_1 = new RegExp(shiftedEl === null || shiftedEl === void 0 ? void 0 : shiftedEl.regExp, "gi");
                 var isValid = resultNumber.match(re_1);
-                console.log("re", re_1);
-                console.log("resultNumber (то, что надо проверять)", resultNumber);
-                console.log("isValid", isValid);
-                if (isValid === null) {
-                    console.log("Это НУЛ");
-                    break;
-                }
                 croppedResult = croppedResult.slice(item.length);
-                result.push(resultNumber);
+                console.log("resultNumber CORRECT", resultNumber);
+                console.log("currentValue CORRECT", currentValue);
+                if (isValid === null) {
+                    result.push(resultNumber.slice(0, resultNumber.length - 1));
+                }
+                else {
+                    result.push(resultNumber);
+                }
             }
             else {
                 result.push(item.replace(/\[|\]/, ""));
