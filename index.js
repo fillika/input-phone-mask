@@ -1,8 +1,8 @@
 "use strict";
 var inputs = document.querySelectorAll('input[type="tel"]');
 var config = {
-    countryCode: "1-784",
-    mask: "(999) 999-99-99",
+    countryCode: 7,
+    mask: "([9]99) [999]-99-94",
     placeholder: true,
 };
 var re = new RegExp("\\+" + config.countryCode, "gi");
@@ -11,6 +11,7 @@ inputs.forEach(function (input) { return InitEasyMask(input, config); });
 function InitEasyMask(input, config) {
     var state = {
         value: "",
+        myTemplate: searchRegExpInMask(config.mask),
     };
     if (typeof config.placeholder === "boolean" && config.placeholder) {
         input.placeholder = "+" + config.countryCode.toString();
@@ -35,7 +36,7 @@ function InitEasyMask(input, config) {
         if (event.target !== undefined && event.target !== null) {
             var value = event.target.value;
             var inputType = event.inputType;
-            var result = getPhoneWithTemplate(value);
+            var result = getPhoneWithTemplate(value, state);
             switch (inputType) {
                 case "insertText":
                     this.value = state.value = result;
@@ -53,7 +54,7 @@ function InitEasyMask(input, config) {
                     break;
                 case "insertFromPaste":
                     var valueWithoutCodetemplate = value.replace(re, "");
-                    this.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate);
+                    this.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate, state);
                     break;
                 default:
                     break;
@@ -62,8 +63,7 @@ function InitEasyMask(input, config) {
     }
 }
 function parseTemplate(mask) {
-    var regExpNumbersGroup = /(\[\d+\]\+)|(\[\d+\])/gm;
-    var regex = /(\d+)|(\D+)|(\s+)/gim;
+    var regex = /(\D+)|(\s+)|(\d+(?=\]))|(\d)/gim;
     var result = [];
     var m;
     while ((m = regex.exec(mask)) !== null) {
@@ -74,32 +74,43 @@ function parseTemplate(mask) {
     }
     return result.filter(Boolean);
 }
-function getPhoneWithTemplate(value) {
+function getPhoneWithTemplate(value, state) {
     var valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
     var parsedArray = parseTemplate(config.mask);
-    var result = createNumber(parsedArray, valueWithoutCodetemplate);
+    var result = createNumber(parsedArray, valueWithoutCodetemplate, state);
     return codeTemplate + " " + result;
 }
-function createNumber(parsedArray, currentValue) {
+function createNumber(parsedArray, currentValue, state) {
     var croppedResult = currentValue;
-    console.log(currentValue);
-    return parsedArray
-        .map(function (item) {
+    var croppedMaskTemplated = state.myTemplate.map(function (item) { return item; });
+    var result = [];
+    for (var index = 0; index < parsedArray.length; index++) {
+        var item = parsedArray[index];
         if (croppedResult.length !== 0) {
             if (item === "" || item === " ") {
-                return item;
+                result.push(item.replace(/\[|\]/, ""));
             }
             else if (!isNaN(Number(item))) {
-                var result = croppedResult.slice(0, item.length);
+                var resultNumber = croppedResult.slice(0, item.length);
+                var shiftedEl = croppedMaskTemplated.shift();
+                var re_1 = new RegExp(shiftedEl === null || shiftedEl === void 0 ? void 0 : shiftedEl.regExp, "gi");
+                var isValid = resultNumber.match(re_1);
+                console.log("re", re_1);
+                console.log("resultNumber (то, что надо проверять)", resultNumber);
+                console.log("isValid", isValid);
+                if (isValid === null) {
+                    console.log("Это НУЛ");
+                    break;
+                }
                 croppedResult = croppedResult.slice(item.length);
-                return result;
+                result.push(resultNumber);
             }
             else {
-                return item;
+                result.push(item.replace(/\[|\]/, ""));
             }
         }
-    })
-        .join("");
+    }
+    return result.join("");
 }
 function removeChar(value) {
     var newValue = value.slice(0, value.length - 1);
@@ -112,10 +123,9 @@ function removeChar(value) {
             return newValue;
     }
 }
-function searchRegExpInMask() {
+function searchRegExpInMask(mask) {
     var result = [];
     var regex = /\[\d+\]|\d+/gm;
-    var mask = "([9]99) [9894]-65-43";
     var m;
     while ((m = regex.exec(mask)) !== null) {
         if (m.index === regex.lastIndex) {
@@ -128,7 +138,6 @@ function searchRegExpInMask() {
         }
         else {
             var singleNumbersArray = find.split("");
-            console.log(singleNumbersArray);
             singleNumbersArray.forEach(function (number) {
                 var numberRegExp = Number(number) === 9 ? "(\\d)" : "[" + number + "]";
                 result.push({
@@ -147,15 +156,15 @@ function searchRegExpInMask() {
             regExp: "",
         };
         if (length >= 2) {
-            var re_1 = /(.)(?=.*\1)/gm;
-            var resultWithoutDuplicates = numberInsideBrackets.replace(re_1, "");
-            regExpConfig.regExp = "[" + resultWithoutDuplicates + "]{" + length + "}";
+            var re_2 = /(.)(?=.*\1)/gm;
+            var resultWithoutDuplicates = numberInsideBrackets.replace(re_2, "");
+            regExpConfig.regExp = "[" + resultWithoutDuplicates + "]{1," + length + "}";
         }
         else {
             regExpConfig.regExp = "[" + numberInsideBrackets + "]";
         }
         return regExpConfig;
     }
+    return result;
 }
-searchRegExpInMask();
 //# sourceMappingURL=index.js.map

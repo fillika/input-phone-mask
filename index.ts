@@ -6,16 +6,10 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
   'input[type="tel"]'
 );
 
-type Tconfig = {
-  countryCode: number | string;
-  mask: string;
-  placeholder?: boolean | string;
-};
-
 const config: Tconfig = {
-  // countryCode: 7,
-  countryCode: "1-784",
-  mask: "(999) 999-99-99",
+  countryCode: 7,
+  // countryCode: "1-784",
+  mask: "([9]99) [999]-99-94",
   placeholder: true,
 };
 
@@ -27,8 +21,9 @@ const codeTemplate = `+${config.countryCode}`;
 inputs.forEach((input) => InitEasyMask(input, config));
 
 function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
-  const state = {
+  const state: inputState = {
     value: "", // ! тут хранится наше value
+    myTemplate: searchRegExpInMask(config.mask),
   };
 
   if (typeof config.placeholder === "boolean" && config.placeholder) {
@@ -59,7 +54,7 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
-      const result = getPhoneWithTemplate(value); // Тут получаем результат, который нужно вводить в поле
+      const result = getPhoneWithTemplate(value, state); // Тут получаем результат, который нужно вводить в поле
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -96,7 +91,8 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
           const valueWithoutCodetemplate = value.replace(re, "");
 
           this.value = state.value = getPhoneWithTemplate(
-            valueWithoutCodetemplate
+            valueWithoutCodetemplate,
+            state
           );
 
           break;
@@ -111,15 +107,8 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
  * * парсинг входящего шаблона (маски)
  */
 function parseTemplate(mask: string): string[] {
-  // todo понять, прислали регулярку или нет
-
-  const regExpNumbersGroup = /(\[\d+\]\+)|(\[\d+\])/gm; // Целое число, например [999]+ или [99]
-  /**
-   * * Тут Я могу 9 принять как ЛЮБОЕ число.
-   * todo Можно заменять 9 на \d. Например [789]+ ==> [78\d]+. Из этого мне надо формировать регулярку, по которой проверять результат
-   */
-
-  const regex = /(\d+)|(\D+)|(\s+)/gim;
+  // const regex = /(\d)|(\D+)|(\s+)/gim;
+  const regex = /(\D+)|(\s+)|(\d+(?=\]))|(\d)/gim;
   const result = [];
   let m;
 
@@ -139,12 +128,12 @@ function parseTemplate(mask: string): string[] {
  * Получаю готовый номер с маской
  * value - чистое, не форматированное
  */
-function getPhoneWithTemplate(value: string): string {
+function getPhoneWithTemplate(value: string, state: inputState): string {
   // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
   const valueWithoutCodetemplate = value.replace(re, "").replace(/\D/g, "");
   const parsedArray = parseTemplate(config.mask);
 
-  const result = createNumber(parsedArray, valueWithoutCodetemplate);
+  const result = createNumber(parsedArray, valueWithoutCodetemplate, state);
   return `${codeTemplate} ${result}`;
 }
 
@@ -154,29 +143,46 @@ function getPhoneWithTemplate(value: string): string {
  * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
  * * своими числами. Потом мы соединим результат через join();
  */
-function createNumber(parsedArray: string[], currentValue: string): string {
+function createNumber(
+  parsedArray: string[],
+  currentValue: string,
+  state: inputState
+): string {
   let croppedResult = currentValue;
+  let croppedMaskTemplated = state.myTemplate.map((item) => item); // Чтобы не было мутации
 
-  console.log(currentValue);
-  // todo ТУТ должна быть проверка на RegExp по шаблону
+  const result: string[] = [];
 
-  return parsedArray
-    .map((item) => {
-      // Проверка на длину. Если длина 0 - то мы не печатаем следующие символы
-      // Например не появятся лишние тире, скобки или еще что-то
-      if (croppedResult.length !== 0) {
-        if (item === "" || item === " ") {
-          return item;
-        } else if (!isNaN(Number(item))) {
-          const result = croppedResult.slice(0, item.length);
-          croppedResult = croppedResult.slice(item.length);
-          return result;
-        } else {
-          return item;
+  for (let index = 0; index < parsedArray.length; index++) {
+    const item = parsedArray[index];
+
+    if (croppedResult.length !== 0) {
+      if (item === "" || item === " ") {
+        result.push(item.replace(/\[|\]/, "")); // Убираю квадратные скобки
+      } else if (!isNaN(Number(item))) {
+        const resultNumber = croppedResult.slice(0, item.length);
+        const shiftedEl = croppedMaskTemplated.shift();
+        const re = new RegExp(shiftedEl?.regExp, "gi");
+        const isValid = resultNumber.match(re);
+
+        console.log("re", re);
+        console.log("resultNumber (то, что надо проверять)", resultNumber);
+        console.log("isValid", isValid);
+
+        if (isValid === null) {
+          console.log("Это НУЛ");
+          break;
         }
+
+        croppedResult = croppedResult.slice(item.length);
+        result.push(resultNumber);
+      } else {
+        result.push(item.replace(/\[|\]/, "")); // Убираю квадратные скобки
       }
-    })
-    .join("");
+    }
+  }
+
+  return result.join("");
 }
 
 // todo вынести функцию в utils
@@ -194,14 +200,11 @@ function removeChar(value: string): string {
   }
 }
 
-// todo функции поиска регулярки
-function searchRegExpInMask() {
+function searchRegExpInMask(mask: string) {
   // Ищу все, что подходит под [9] или [999]
   // const maskRegExp = mask.replace(/\D/gmi, "");
   const result = [];
   const regex = /\[\d+\]|\d+/gm;
-  const mask = `([9]99) [9894]-65-43`;
-
   let m;
 
   while ((m = regex.exec(mask)) !== null) {
@@ -219,11 +222,10 @@ function searchRegExpInMask() {
     } else {
       // * Тут работаю со всеми остальными числами
       const singleNumbersArray = find.split("");
-      console.log(singleNumbersArray);
 
       singleNumbersArray.forEach((number) => {
         // * проверка на 9. Если number === 9 то это любое число
-        const numberRegExp = Number(number) === 9 ? `(\\d)` : `[${number}]`
+        const numberRegExp = Number(number) === 9 ? `(\\d)` : `[${number}]`;
 
         result.push({
           length: 1,
@@ -258,12 +260,12 @@ function searchRegExpInMask() {
       const re = /(.)(?=.*\1)/gm; // Поиск повторяющихся чисел
       const resultWithoutDuplicates = numberInsideBrackets.replace(re, "");
 
-      regExpConfig.regExp = `[${resultWithoutDuplicates}]{${length}}`;
+      regExpConfig.regExp = `[${resultWithoutDuplicates}]{1,${length}}`;
     } else {
       regExpConfig.regExp = `[${numberInsideBrackets}]`;
     }
     return regExpConfig;
   }
-}
 
-searchRegExpInMask();
+  return result;
+}
