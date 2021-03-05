@@ -200,7 +200,7 @@ function searchRegExpInMask() {
   // const maskRegExp = mask.replace(/\D/gmi, "");
   const result = [];
   const regex = /\[\d+\]|\d+/gm;
-  const mask = `([9]87) [9894]-65-43`;
+  const mask = `([9]99) [9894]-65-43`;
 
   let m;
 
@@ -211,37 +211,42 @@ function searchRegExpInMask() {
 
     const [find] = m;
 
+    const regExpSquareBrackets = find.match(/\[\d+\]/gm);
+
+    // * Сначала ищу и заменяю все цифры в квадратных скобках на регулярные выражения
+    if (regExpSquareBrackets !== null) {
+      result.push(getNumbersInSquareBrackets(regExpSquareBrackets));
+    } else {
+      // * Тут работаю со всеми остальными числами
+      const singleNumbersArray = find.split("");
+      console.log(singleNumbersArray);
+
+      singleNumbersArray.forEach((number) => {
+        // * проверка на 9. Если number === 9 то это любое число
+        const numberRegExp = Number(number) === 9 ? `(\\d)` : `[${number}]`
+
+        result.push({
+          length: 1,
+          regExp: numberRegExp,
+        });
+      });
+    }
+  }
+
+  /** Функция создания regExp для цифр в квадратных скобках */
+  function getNumbersInSquareBrackets(regExpSquareBrackets: RegExpMatchArray) {
+    let [a] = regExpSquareBrackets; // Квадратная скобка с числами [9] или [99]
+    const numberInsideBrackets = a.match(/\d+/gm)![0];
+    const length = numberInsideBrackets.length;
+
     /**
      * Это конфиг, по которому Я буду проверять каждый символ. Содержит regExp и длину проверки
      * По длине Я буду в приходящем значении брать кол-во символов
      */
     const regExpConfig = {
-      length: 0,
-      regExp: `\\d+`,
+      length: length,
+      regExp: ``,
     };
-
-    // * Сначала ищу и заменяю все цифры в квадратных скобках на регулярные выражения
-    const regExpSquareBrackets = find.match(/\[\d+\]/gm);
-
-    if (regExpSquareBrackets !== null) {
-      getNumbersInSquareBrackets(regExpSquareBrackets, regExpConfig);
-    }
-
-    result.push(regExpConfig);
-  }
-
-  console.log("Result:", result);
-
-  /** Функция создания regExp для цифр в квадратных скобках */
-  function getNumbersInSquareBrackets(
-    regExpSquareBrackets: RegExpMatchArray,
-    config: { [key: string]: string | number }
-  ) {
-    let [a] = regExpSquareBrackets; // Квадратная скобка с числами [9] или [99]
-    const numberInsideBrackets = a.match(/\d+/gm)![0];
-    const length = numberInsideBrackets.length;
-
-    config.length = length;
 
     // * проверка на количество символов внутри скобок
     if (length >= 2) {
@@ -253,10 +258,11 @@ function searchRegExpInMask() {
       const re = /(.)(?=.*\1)/gm; // Поиск повторяющихся чисел
       const resultWithoutDuplicates = numberInsideBrackets.replace(re, "");
 
-      config.regExp = `[${resultWithoutDuplicates}]{${length}}`;
+      regExpConfig.regExp = `[${resultWithoutDuplicates}]{${length}}`;
     } else {
-      config.regExp = `[${numberInsideBrackets}]`;
+      regExpConfig.regExp = `[${numberInsideBrackets}]`;
     }
+    return regExpConfig;
   }
 }
 

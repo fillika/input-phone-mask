@@ -115,37 +115,46 @@ function removeChar(value) {
 function searchRegExpInMask() {
     var result = [];
     var regex = /\[\d+\]|\d+/gm;
-    var mask = "([9]87) [9894]-65-43";
+    var mask = "([9]99) [9894]-65-43";
     var m;
     while ((m = regex.exec(mask)) !== null) {
         if (m.index === regex.lastIndex) {
             regex.lastIndex++;
         }
         var find = m[0];
-        var regExpConfig = {
-            length: 0,
-            regExp: "\\d+",
-        };
         var regExpSquareBrackets = find.match(/\[\d+\]/gm);
         if (regExpSquareBrackets !== null) {
-            getNumbersInSquareBrackets(regExpSquareBrackets, regExpConfig);
+            result.push(getNumbersInSquareBrackets(regExpSquareBrackets));
         }
-        result.push(regExpConfig);
+        else {
+            var singleNumbersArray = find.split("");
+            console.log(singleNumbersArray);
+            singleNumbersArray.forEach(function (number) {
+                var numberRegExp = Number(number) === 9 ? "(\\d)" : "[" + number + "]";
+                result.push({
+                    length: 1,
+                    regExp: numberRegExp,
+                });
+            });
+        }
     }
-    console.log("Result:", result);
-    function getNumbersInSquareBrackets(regExpSquareBrackets, config) {
+    function getNumbersInSquareBrackets(regExpSquareBrackets) {
         var a = regExpSquareBrackets[0];
         var numberInsideBrackets = a.match(/\d+/gm)[0];
         var length = numberInsideBrackets.length;
-        config.length = length;
+        var regExpConfig = {
+            length: length,
+            regExp: "",
+        };
         if (length >= 2) {
             var re_1 = /(.)(?=.*\1)/gm;
             var resultWithoutDuplicates = numberInsideBrackets.replace(re_1, "");
-            config.regExp = "[" + resultWithoutDuplicates + "]{" + length + "}";
+            regExpConfig.regExp = "[" + resultWithoutDuplicates + "]{" + length + "}";
         }
         else {
-            config.regExp = "[" + numberInsideBrackets + "]";
+            regExpConfig.regExp = "[" + numberInsideBrackets + "]";
         }
+        return regExpConfig;
     }
 }
 searchRegExpInMask();
