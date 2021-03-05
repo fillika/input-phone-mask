@@ -2,7 +2,7 @@
 var inputs = document.querySelectorAll('input[type="tel"]');
 var config = {
     countryCode: "1-784",
-    mask: "([9]99) 4 44 44",
+    mask: "(999) 999-99-99",
     placeholder: true,
 };
 var re = new RegExp("\\+" + config.countryCode, "gi");
@@ -82,6 +82,7 @@ function getPhoneWithTemplate(value) {
 }
 function createNumber(parsedArray, currentValue) {
     var croppedResult = currentValue;
+    console.log(currentValue);
     return parsedArray
         .map(function (item) {
         if (croppedResult.length !== 0) {
@@ -112,9 +113,40 @@ function removeChar(value) {
     }
 }
 function searchRegExpInMask() {
-    var mask = "([9]99) [999]-99-99";
-    var maskRegExp = mask.replace(/\D/gmi, "");
-    console.log(maskRegExp);
+    var result = [];
+    var regex = /\[\d+\]|\d+/gm;
+    var mask = "([9]87) [9894]-65-43";
+    var m;
+    while ((m = regex.exec(mask)) !== null) {
+        if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+        var find = m[0];
+        var regExpConfig = {
+            length: 0,
+            regExp: "\\d+",
+        };
+        var regExpSquareBrackets = find.match(/\[\d+\]/gm);
+        if (regExpSquareBrackets !== null) {
+            getNumbersInSquareBrackets(regExpSquareBrackets, regExpConfig);
+        }
+        result.push(regExpConfig);
+    }
+    console.log("Result:", result);
+    function getNumbersInSquareBrackets(regExpSquareBrackets, config) {
+        var a = regExpSquareBrackets[0];
+        var numberInsideBrackets = a.match(/\d+/gm)[0];
+        var length = numberInsideBrackets.length;
+        config.length = length;
+        if (length >= 2) {
+            var re_1 = /(.)(?=.*\1)/gm;
+            var resultWithoutDuplicates = numberInsideBrackets.replace(re_1, "");
+            config.regExp = "[" + resultWithoutDuplicates + "]{" + length + "}";
+        }
+        else {
+            config.regExp = "[" + numberInsideBrackets + "]";
+        }
+    }
 }
 searchRegExpInMask();
 //# sourceMappingURL=index.js.map

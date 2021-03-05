@@ -15,7 +15,7 @@ type Tconfig = {
 const config: Tconfig = {
   // countryCode: 7,
   countryCode: "1-784",
-  mask: "([9]99) 4 44 44",
+  mask: "(999) 999-99-99",
   placeholder: true,
 };
 
@@ -157,6 +157,9 @@ function getPhoneWithTemplate(value: string): string {
 function createNumber(parsedArray: string[], currentValue: string): string {
   let croppedResult = currentValue;
 
+  console.log(currentValue);
+  // todo ТУТ должна быть проверка на RegExp по шаблону
+
   return parsedArray
     .map((item) => {
       // Проверка на длину. Если длина 0 - то мы не печатаем следующие символы
@@ -194,10 +197,67 @@ function removeChar(value: string): string {
 // todo функции поиска регулярки
 function searchRegExpInMask() {
   // Ищу все, что подходит под [9] или [999]
-  const mask = "([9]99) [999]-99-99";
-  const maskRegExp = mask.replace(/\D/gmi, "");
+  // const maskRegExp = mask.replace(/\D/gmi, "");
+  const result = [];
+  const regex = /\[\d+\]|\d+/gm;
+  const mask = `([9]87) [9894]-65-43`;
 
-  console.log(maskRegExp);
+  let m;
+
+  while ((m = regex.exec(mask)) !== null) {
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+
+    const [find] = m;
+
+    /**
+     * Это конфиг, по которому Я буду проверять каждый символ. Содержит regExp и длину проверки
+     * По длине Я буду в приходящем значении брать кол-во символов
+     */
+    const regExpConfig = {
+      length: 0,
+      regExp: `\\d+`,
+    };
+
+    // * Сначала ищу и заменяю все цифры в квадратных скобках на регулярные выражения
+    const regExpSquareBrackets = find.match(/\[\d+\]/gm);
+
+    if (regExpSquareBrackets !== null) {
+      getNumbersInSquareBrackets(regExpSquareBrackets, regExpConfig);
+    }
+
+    result.push(regExpConfig);
+  }
+
+  console.log("Result:", result);
+
+  /** Функция создания regExp для цифр в квадратных скобках */
+  function getNumbersInSquareBrackets(
+    regExpSquareBrackets: RegExpMatchArray,
+    config: { [key: string]: string | number }
+  ) {
+    let [a] = regExpSquareBrackets; // Квадратная скобка с числами [9] или [99]
+    const numberInsideBrackets = a.match(/\d+/gm)![0];
+    const length = numberInsideBrackets.length;
+
+    config.length = length;
+
+    // * проверка на количество символов внутри скобок
+    if (length >= 2) {
+      /**
+       * https://learn.javascript.ru/regexp-lookahead-lookbehind
+       * https://overcoder.net/q/617891/regex-%D1%83%D0%B4%D0%B0%D0%BB%D0%B8%D1%82%D1%8C-%D0%BF%D0%BE%D0%B2%D1%82%D0%BE%D1%80%D1%8F%D1%8E%D1%89%D0%B8%D0%B5%D1%81%D1%8F-%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D1%8B-%D0%B8%D0%B7-%D1%81%D1%82%D1%80%D0%BE%D0%BA%D0%B8-%D1%81-%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%D1%8E-javascript
+       * * проверка на одинаковые числа
+       */
+      const re = /(.)(?=.*\1)/gm; // Поиск повторяющихся чисел
+      const resultWithoutDuplicates = numberInsideBrackets.replace(re, "");
+
+      config.regExp = `[${resultWithoutDuplicates}]{${length}}`;
+    } else {
+      config.regExp = `[${numberInsideBrackets}]`;
+    }
+  }
 }
 
 searchRegExpInMask();
