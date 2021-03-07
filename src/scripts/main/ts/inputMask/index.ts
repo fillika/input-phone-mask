@@ -18,45 +18,51 @@ const config: Tconfig = {
 // ! GLOBAL
 const re = new RegExp(`\\+${config.countryCode}`, 'gi');
 const codeTemplate = `+${config.countryCode}`;
+class EasyPhoneMask {
+  state: inputState;
+  input: HTMLInputElement;
 
-// todo Мб переписать под класс?
-inputs.forEach(input => InitEasyMask(input, config));
+  constructor(input: HTMLInputElement, config: Tconfig) {
+    this.state = {
+      value: '',
+      myTemplate: searchRegExpInMask(config.mask),
+    };
+    this.input = input;
 
-function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
-  const state: inputState = {
-    value: '', // ! тут хранится наше value
-    myTemplate: searchRegExpInMask(config.mask),
-  };
+    if (typeof config.placeholder === 'boolean' && config.placeholder) {
+      input.placeholder = '+' + config.countryCode.toString();
+    } else if (typeof config.placeholder === 'string') {
+      input.placeholder = config.placeholder;
+    }
 
-  if (typeof config.placeholder === 'boolean' && config.placeholder) {
-    input.placeholder = '+' + config.countryCode.toString();
-  } else if (typeof config.placeholder === 'string') {
-    input.placeholder = config.placeholder;
+    this.init();
   }
-  // * note вешаем слушателей
-  input.addEventListener('focus', inputEventFocus.bind(input));
-  input.addEventListener('input', inputEventInput.bind(input));
 
-  // * note управляем кареткой
-  // https://learn.javascript.ru/selection-range
-  function inputEventFocus(this: HTMLInputElement) {
-    const value = this.value;
+  init() {
+    console.log('init');
+    // * note вешаем слушателей
+    this.input.addEventListener('focus', this.inputEventFocus.bind(this));
+    this.input.addEventListener('input', this.inputEventInput.bind(this));
+  }
+
+  inputEventFocus(this: EasyPhoneMask) {
+    const value = this.input.value;
 
     if (value.length === 0) {
-      this.value = codeTemplate;
+      this.input.value = codeTemplate;
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
       const timeoutID = setTimeout(() => {
-        this.selectionStart = this.selectionEnd = this.value.length; // Устанавливаем каретку на начало
+        this.input.selectionStart = this.input.selectionEnd = this.input.value.length; // Устанавливаем каретку на начало
         clearTimeout(timeoutID);
       }, 10);
     }
   }
 
-  function inputEventInput(this: HTMLInputElement, event: Event) {
+  inputEventInput(this: EasyPhoneMask, event: Event) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
-      const result = getPhoneWithTemplate(value, state); // Тут получаем результат, который нужно вводить в поле
+      const result = getPhoneWithTemplate(value, this.state); // Тут получаем результат, который нужно вводить в поле
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -66,23 +72,23 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
        * */
       switch (inputType) {
         case 'insertText':
-          this.value = state.value = result;
-          this.selectionStart = this.selectionEnd = result.length; // Управляем кареткой
+          this.input.value = this.state.value = result;
+          this.input.selectionStart = this.input.selectionEnd = result.length; // Управляем кареткой
 
           break;
         case 'deleteContentBackward':
-          const diff = state.value.replace(value, ''); // Нахожу символ, который удален
+          const diff = this.state.value.replace(value, ''); // Нахожу символ, который удален
 
           // note если удаляем 1 не более 1 символа
           if (diff.length === 1) {
             const isNan = isNaN(Number(diff)) || diff === ' ';
 
             if (isNan) {
-              this.value = removeChar(value);
+              this.input.value = removeChar(value);
             }
           }
 
-          state.value = this.value; // обновляю state.value после каждого удаления
+          this.state.value = this.input.value; // обновляю state.value после каждого удаления
 
           break;
         case 'insertFromPaste':
@@ -92,7 +98,7 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
            */
           const valueWithoutCodetemplate = value.replace(re, '');
 
-          this.value = state.value = getPhoneWithTemplate(valueWithoutCodetemplate, state);
+          this.input.value = this.state.value = getPhoneWithTemplate(valueWithoutCodetemplate, this.state);
 
           break;
         default:
@@ -102,6 +108,7 @@ function InitEasyMask(input: HTMLInputElement, config: Tconfig) {
   }
 }
 
+inputs.forEach(input => new EasyPhoneMask(input, config));
 
 /**
  * Получаю готовый номер с маской
@@ -159,4 +166,3 @@ function createNumber(parsedArray: string[], currentValue: string, state: inputS
 
   return result.join('');
 }
-
