@@ -114,12 +114,12 @@ export function searchRegExpInMask(mask: string) {
  */
 export function getPhoneWithTemplate(value: string, state: inputState): string {
   // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
-  const {globalRegExp, config, prefix, countryCodeTemplate} = state;
+  const { globalRegExp, config, prefix, countryCodeTemplate } = state;
   const valueWithoutCodetemplate = value.replace(globalRegExp, '').replace(/\D/g, '');
   const parsedArray = parseTemplate(config.mask);
   const result = createNumber(parsedArray, valueWithoutCodetemplate, state);
 
-  return `${prefix}${countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' ' }${result}`;
+  return `${prefix}${countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '}${result}`;
 }
 
 /**

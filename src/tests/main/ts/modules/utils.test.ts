@@ -1,4 +1,4 @@
-import { parseTemplate } from 'Scripts/main/ts/inputMask/utils';
+import { parseTemplate, searchRegExpInMask } from 'Scripts/main/ts/inputMask/utils';
 
 describe('Test function parseTemplate', () => {
   test('Test mask ([9]99) [123]-99-91', () => {
@@ -19,5 +19,63 @@ describe('Test function parseTemplate', () => {
   test('Test mask 9999992145', () => {
     const result = parseTemplate('9999992145');
     expect(result).toEqual(['9', '9', '9', '9', '9', '9', '2', '1', '4', '5']);
+  });
+});
+
+describe('Test func searchRegExpInMask', () => {
+  test('Test mask ([9]99) [123]-99-91', () => {
+    const result = searchRegExpInMask('([9]99) [123]-99-91');
+    expect(result).toEqual([
+      { length: 1, regExp: '[9]' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 3, regExp: '[123]+(?![0-9])' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '[1]' },
+    ]);
+  });
+
+  test('Test mask (999) [111]-99-91', () => {
+    const result = searchRegExpInMask('(999) [111]-99-91');
+    expect(result).toEqual([
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 3, regExp: '[1]+(?![0-9])' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '[1]' },
+    ]);
+  });
+
+  test('Test mask 999111-99-91', () => {
+    const result = searchRegExpInMask('999111-99-91');
+    expect(result).toEqual([
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '[1]' },
+      { length: 1, regExp: '[1]' },
+      { length: 1, regExp: '[1]' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '[1]' },
+    ]);
+  });
+
+  test('Test mask 999[12]88', () => {
+    const result = searchRegExpInMask('999[12]88');
+    expect(result).toEqual([
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 1, regExp: '(\\d)' },
+      { length: 2, regExp: '[12]+(?![0-9])' },
+      { length: 1, regExp: '[8]' },
+      { length: 1, regExp: '[8]' },
+    ]);
   });
 });
