@@ -4,6 +4,7 @@ export default class Root {
   state: inputState;
   input: HTMLInputElement;
   defaultConfig: Tconfig;
+  config: Tconfig;
 
   constructor(input: HTMLInputElement, config?: Tconfig) {
     this.defaultConfig = {
@@ -13,17 +14,20 @@ export default class Root {
       placeholder: false,
     };
 
-    if (!config) {
-      config = this.defaultConfig;
+    this.config = {
+      mask: config?.mask || this.defaultConfig.mask,
+      countryCode: config?.countryCode || this.defaultConfig.countryCode,
+      placeholder: config?.placeholder || this.defaultConfig.placeholder,
+      prefix: config?.prefix || this.defaultConfig.prefix,
     }
 
     this.state = {
       value: '',
-      config: config,
-      myTemplate: searchRegExpInMask(config.mask),
-      prefix: config.prefix || '',
-      globalRegExp: new RegExp(`${config.countryCode}`, 'gi'),
-      countryCodeTemplate: `${config.countryCode}`,
+      config: this.config,
+      myTemplate: searchRegExpInMask(this.config.mask),
+      prefix: this.config.prefix || '',
+      globalRegExp: new RegExp(`${this.config.countryCode}`, 'gi'),
+      countryCodeTemplate: `${this.config.countryCode}`,
     };
 
     this.input = input;
