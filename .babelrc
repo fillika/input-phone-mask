@@ -1,0 +1,19 @@
+{
+  "presets": [
+    [
+      "@babel/env",
+      {
+        "targets": {
+          "edge": "60",
+          "firefox": "65",
+          "chrome": "75",
+          "opera": "60",
+          "safari": "12",
+          "ios": "12"
+        }
+      }
+    ],
+    ["@babel/preset-react"]
+  ],
+  "plugins": ["@babel/plugin-proposal-class-properties"]
+}

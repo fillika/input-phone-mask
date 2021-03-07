@@ -1,0 +1,18 @@
+@import './variables';
+@import './mixins';
+@import './common';
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color, #fff);
+  color: var(--text-main-color, #fff);
+}
+
+img,
+svg {
+  width: 100%;
+}
