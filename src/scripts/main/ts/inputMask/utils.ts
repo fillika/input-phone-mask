@@ -98,7 +98,8 @@ export function searchRegExpInMask(mask: string) {
        * [9]+(?![0-9])
        * [123]+(?![0-9])
        */
-      regExpConfig.regExp = `[${resultWithoutDuplicates}]+(?![0-9])`;
+      // regExpConfig.regExp = `[${resultWithoutDuplicates}]+(?![0-9])`;
+      regExpConfig.regExp = `^[${resultWithoutDuplicates}]+$`;
     } else {
       regExpConfig.regExp = `[${numberInsideBrackets}]`;
     }
@@ -144,6 +145,7 @@ export function createNumber(parsedArray: string[], currentValue: string, state:
       } else if (!isNaN(Number(item))) {
         const resultNumber = croppedResult.slice(0, item.length);
         const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
+        // todo неверный regExp типа [123]+(?![0-9]) пропускает число 42, так как определяет двойку
         const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
         const isValid = resultNumber.match(re);
 
@@ -156,9 +158,11 @@ export function createNumber(parsedArray: string[], currentValue: string, state:
            * Если цифр несколько (например 910 825) и после 910 8 не должно быть, то Я прерываю
            * цикл через break
            */
-          result.push(resultNumber.slice(0, resultNumber.length - 1));
-
-          break
+          if (currentValue.length > 1) {
+            break
+          } else {
+            result.push(resultNumber.slice(0, resultNumber.length - 1));
+          }
         } else {
           result.push(resultNumber);
         }

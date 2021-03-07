@@ -29,7 +29,7 @@ describe('Test func searchRegExpInMask', () => {
       { length: 1, regExp: '[9]' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
-      { length: 3, regExp: '[123]+(?![0-9])' },
+      { length: 3, regExp: '^[123]+$' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
@@ -43,7 +43,7 @@ describe('Test func searchRegExpInMask', () => {
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
-      { length: 3, regExp: '[1]+(?![0-9])' },
+      { length: 3, regExp: '^[1]+$' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
@@ -74,7 +74,7 @@ describe('Test func searchRegExpInMask', () => {
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
       { length: 1, regExp: '(\\d)' },
-      { length: 2, regExp: '[12]+(?![0-9])' },
+      { length: 2, regExp: '^[12]+$' },
       { length: 1, regExp: '[8]' },
       { length: 1, regExp: '[8]' },
     ]);
@@ -118,5 +118,12 @@ describe('Test func getPhoneWithTemplate', () => {
 
     expect(result).toBe('+7 (')
     expect(result).not.toBe('+7 (15')
+  });
+
+  test('Test value 99142', () => {
+    const value = '99142';
+    const result = getPhoneWithTemplate(value, state);
+
+    expect(result).toBe('+7 (991) ')
   });
 });
