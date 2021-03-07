@@ -1,8 +1,7 @@
 import Root from './Root';
 import { getPhoneWithTemplate, removeChar } from './utils';
 
-
-/** *  */
+/** * Тут класс с основными методами  */
 class Methods extends Root {
   constructor(input: HTMLInputElement, config?: Tconfig) {
     super(input, config);
