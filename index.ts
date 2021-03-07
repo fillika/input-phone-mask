@@ -1,6 +1,8 @@
 // TODO Глобальные
 // todo метод destroy
 // todo метод reinit();
+// todo валидацию
+// todo NOTE - опционально - подсказку под цифры.
 
 const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
   'input[type="tel"]'
@@ -9,7 +11,7 @@ const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll(
 const config: Tconfig = {
   countryCode: 7,
   // countryCode: "1-784",
-  mask: "([9]99) [123]-99-94",
+  mask: "([9]99) [123]-99-92",
   placeholder: true,
 };
 
@@ -161,13 +163,11 @@ function createNumber(
         result.push(item.replace(/\[|\]/, "")); // Убираю квадратные скобки
       } else if (!isNaN(Number(item))) {
         const resultNumber = croppedResult.slice(0, item.length);
-        const shiftedEl = croppedMaskTemplated.shift();
-        const re = new RegExp(shiftedEl?.regExp, "gi");
+        const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
+        const re = new RegExp(shiftedRegExpConfig!.regExp, "gi");
         const isValid = resultNumber.match(re);
 
         croppedResult = croppedResult.slice(item.length);
-        console.log("resultNumber CORRECT", resultNumber);
-        console.log("currentValue CORRECT", currentValue);
 
         if (isValid === null) {
           /**
