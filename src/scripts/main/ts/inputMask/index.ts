@@ -1,5 +1,5 @@
-import { removeChar, parseTemplate, getPhoneWithTemplate } from './utils';
 import Root from './Root';
+import { removeChar, getPhoneWithTemplate } from './utils';
 
 // TODO Глобальные
 // todo метод destroy
@@ -19,6 +19,9 @@ const config: Tconfig = {
 class EasyPhoneMask extends Root {
   constructor(input: HTMLInputElement, config?: Tconfig) {
     super(input, config);
+
+    this.inputEventFocus = this.inputEventFocus.bind(this);
+    this.inputEventInput = this.inputEventInput.bind(this);
     this.init();
   }
 
@@ -28,19 +31,26 @@ class EasyPhoneMask extends Root {
 
   private init() {
     // * note вешаем слушателей
-    this.input.addEventListener('focus', this.inputEventFocus.bind(this));
-    this.input.addEventListener('input', this.inputEventInput.bind(this));
+    this.input.addEventListener('focus', this.inputEventFocus);
+    this.input.addEventListener('input', this.inputEventInput);
     this.setPlaceholder();
   }
 
-  public reinit() {
-    console.log('Reinit');
+  public reinit(config?: Tconfig) {
+    // todo реинициализация c новыми параметрами
+    this.unmask();
+    new EasyPhoneMask(this.input, config)
   }
 
-  public destroy() {
-    console.log('Destroy');
-    this.input.removeEventListener('focus', this.inputEventFocus.bind(this));
-    this.input.removeEventListener('input', this.inputEventInput.bind(this));
+  public unmask() {
+    this.input.value = '';
+
+    if (this.state.config.placeholder) {
+      this.input.placeholder = '';
+    }
+
+    this.input.removeEventListener('focus', this.inputEventFocus, false);
+    this.input.removeEventListener('input', this.inputEventInput, false);
   }
 
   private setPlaceholder() {
@@ -115,4 +125,4 @@ class EasyPhoneMask extends Root {
 }
 
 EasyPhoneMask.toGlobalWindow();
-inputs.forEach(input => new EasyPhoneMask(input, config));
+// inputs.forEach(input => new EasyPhoneMask(input, config));
