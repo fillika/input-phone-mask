@@ -117,9 +117,10 @@ export function getPhoneWithTemplate(value: string, state: inputState): string {
   const { globalRegExp, config, prefix, countryCodeTemplate } = state;
   const valueWithoutCodetemplate = value.replace(globalRegExp, '').replace(/\D/g, '');
   const parsedArray = parseTemplate(config.mask);
-  const result = createNumber(parsedArray, valueWithoutCodetemplate, state);
+  const number = createNumber(parsedArray, valueWithoutCodetemplate, state);
+  const result = `${prefix}${countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '}${number}`;
 
-  return `${prefix}${countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '}${result}`;
+  return result;
 }
 
 /**
@@ -150,10 +151,14 @@ export function createNumber(parsedArray: string[], currentValue: string, state:
 
         if (isValid === null) {
           /**
-           * Тут Я обрезаю последнее число, если оно не соответствует шаблону.
-           * Если это одна цифра - то Я вставд. пустую строку
+           * Тут может прийти либо одно число, либо группа чисел при копировании
+           * Если число одно и оно неверное, тогда Я просто обрезаю его
+           * Если цифр несколько (например 910 825) и после 910 8 не должно быть, то Я прерываю
+           * цикл через break
            */
           result.push(resultNumber.slice(0, resultNumber.length - 1));
+
+          break
         } else {
           result.push(resultNumber);
         }
