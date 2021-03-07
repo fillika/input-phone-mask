@@ -107,3 +107,60 @@ export function searchRegExpInMask(mask: string) {
 
   return result;
 }
+
+/**
+ * Получаю готовый номер с маской
+ * value - чистое, не форматированное
+ */
+export function getPhoneWithTemplate(value: string, state: inputState): string {
+  // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
+  const valueWithoutCodetemplate = value.replace(state.globalRegExp, '').replace(/\D/g, '');
+  const parsedArray = parseTemplate(state.config.mask);
+  const result = createNumber(parsedArray, valueWithoutCodetemplate, state);
+
+  return `${state.prefix}${state.countryCodeTemplate}${result}`;
+}
+
+/**
+ * * Создаем правильный номер с использованием шаблона
+ * * Как работает шаблон - мы берем parsedArray (пример. [" (", "987", ") ", "654", "-", "32", "-", "10"])
+ * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
+ * * своими числами. Потом мы соединим результат через join();
+ */
+export function createNumber(parsedArray: string[], currentValue: string, state: inputState): string {
+  let croppedResult = currentValue;
+  let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
+
+  const result: string[] = [];
+
+  for (let index = 0; index < parsedArray.length; index++) {
+    const item = parsedArray[index];
+
+    if (croppedResult.length !== 0) {
+      if (item === '' || item === ' ') {
+        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
+      } else if (!isNaN(Number(item))) {
+        const resultNumber = croppedResult.slice(0, item.length);
+        const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
+        const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
+        const isValid = resultNumber.match(re);
+
+        croppedResult = croppedResult.slice(item.length);
+
+        if (isValid === null) {
+          /**
+           * Тут Я обрезаю последнее число, если оно не соответствует шаблону.
+           * Если это одна цифра - то Я вставд. пустую строку
+           */
+          result.push(resultNumber.slice(0, resultNumber.length - 1));
+        } else {
+          result.push(resultNumber);
+        }
+      } else {
+        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
+      }
+    }
+  }
+
+  return result.join('');
+}

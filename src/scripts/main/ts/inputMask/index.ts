@@ -1,4 +1,5 @@
-import { removeChar, parseTemplate, searchRegExpInMask } from './utils';
+import { removeChar, parseTemplate, getPhoneWithTemplate } from './utils';
+import Root from './Root';
 
 // TODO Глобальные
 // todo метод destroy
@@ -9,47 +10,52 @@ import { removeChar, parseTemplate, searchRegExpInMask } from './utils';
 const inputs: NodeListOf<HTMLInputElement> = document.querySelectorAll('input[type="tel"]');
 
 const config: Tconfig = {
-  countryCode: 7,
-  // countryCode: "1-784",
-  mask: '([9]99) [123]-99-92',
+  prefix: '+',
+  countryCode: '7 ',
+  mask: '([9]99) [123]-99-91',
   placeholder: true,
 };
 
-// ! GLOBAL
-const re = new RegExp(`\\+${config.countryCode}`, 'gi');
-const codeTemplate = `+${config.countryCode}`;
-class EasyPhoneMask {
-  state: inputState;
-  input: HTMLInputElement;
-
-  constructor(input: HTMLInputElement, config: Tconfig) {
-    this.state = {
-      value: '',
-      myTemplate: searchRegExpInMask(config.mask),
-    };
-    this.input = input;
-
-    if (typeof config.placeholder === 'boolean' && config.placeholder) {
-      input.placeholder = '+' + config.countryCode.toString();
-    } else if (typeof config.placeholder === 'string') {
-      input.placeholder = config.placeholder;
-    }
-
+class EasyPhoneMask extends Root {
+  constructor(input: HTMLInputElement, config?: Tconfig) {
+    super(input, config);
     this.init();
   }
 
-  init() {
-    console.log('init');
+  static toGlobalWindow() {
+    (<any>window).EasyPhoneMask = EasyPhoneMask;
+  }
+
+  private init() {
     // * note вешаем слушателей
     this.input.addEventListener('focus', this.inputEventFocus.bind(this));
     this.input.addEventListener('input', this.inputEventInput.bind(this));
+    this.setPlaceholder();
   }
 
-  inputEventFocus(this: EasyPhoneMask) {
+  public reinit() {
+    console.log('Reinit');
+  }
+
+  public destroy() {
+    console.log('Destroy');
+    this.input.removeEventListener('focus', this.inputEventFocus.bind(this));
+    this.input.removeEventListener('input', this.inputEventInput.bind(this));
+  }
+
+  private setPlaceholder() {
+    if (typeof this.state.config.placeholder === 'boolean' && this.state.config.placeholder) {
+      this.input.placeholder = this.state.prefix + this.state.config.countryCode.toString();
+    } else if (typeof this.state.config.placeholder === 'string') {
+      this.input.placeholder = this.state.config.placeholder;
+    }
+  }
+
+  private inputEventFocus(this: EasyPhoneMask) {
     const value = this.input.value;
 
     if (value.length === 0) {
-      this.input.value = codeTemplate;
+      this.input.value = this.state.prefix + this.state.countryCodeTemplate;
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
       const timeoutID = setTimeout(() => {
         this.input.selectionStart = this.input.selectionEnd = this.input.value.length; // Устанавливаем каретку на начало
@@ -58,7 +64,7 @@ class EasyPhoneMask {
     }
   }
 
-  inputEventInput(this: EasyPhoneMask, event: Event) {
+  private inputEventInput(this: EasyPhoneMask, event: Event) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
@@ -96,7 +102,7 @@ class EasyPhoneMask {
            * * при копировании пользователь может захватить кусок нашего шаблона (маски)
            * * чтобы это отсеять мы создаем регулярку, которая включает шаблон кода страны
            */
-          const valueWithoutCodetemplate = value.replace(re, '');
+          const valueWithoutCodetemplate = value.replace(this.state.globalRegExp, '');
 
           this.input.value = this.state.value = getPhoneWithTemplate(valueWithoutCodetemplate, this.state);
 
@@ -108,61 +114,5 @@ class EasyPhoneMask {
   }
 }
 
+EasyPhoneMask.toGlobalWindow();
 inputs.forEach(input => new EasyPhoneMask(input, config));
-
-/**
- * Получаю готовый номер с маской
- * value - чистое, не форматированное
- */
-function getPhoneWithTemplate(value: string, state: inputState): string {
-  // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
-  const valueWithoutCodetemplate = value.replace(re, '').replace(/\D/g, '');
-  const parsedArray = parseTemplate(config.mask);
-
-  const result = createNumber(parsedArray, valueWithoutCodetemplate, state);
-  return `${codeTemplate} ${result}`;
-}
-
-/**
- * * Создаем правильный номер с использованием шаблона
- * * Как работает шаблон - мы берем parsedArray (пример. [" (", "987", ") ", "654", "-", "32", "-", "10"])
- * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
- * * своими числами. Потом мы соединим результат через join();
- */
-function createNumber(parsedArray: string[], currentValue: string, state: inputState): string {
-  let croppedResult = currentValue;
-  let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
-
-  const result: string[] = [];
-
-  for (let index = 0; index < parsedArray.length; index++) {
-    const item = parsedArray[index];
-
-    if (croppedResult.length !== 0) {
-      if (item === '' || item === ' ') {
-        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
-      } else if (!isNaN(Number(item))) {
-        const resultNumber = croppedResult.slice(0, item.length);
-        const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
-        const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
-        const isValid = resultNumber.match(re);
-
-        croppedResult = croppedResult.slice(item.length);
-
-        if (isValid === null) {
-          /**
-           * Тут Я обрезаю последнее число, если оно не соответствует шаблону.
-           * Если это одна цифра - то Я вставд. пустую строку
-           */
-          result.push(resultNumber.slice(0, resultNumber.length - 1));
-        } else {
-          result.push(resultNumber);
-        }
-      } else {
-        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
-      }
-    }
-  }
-
-  return result.join('');
-}
