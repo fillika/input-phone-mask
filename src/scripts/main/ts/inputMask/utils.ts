@@ -118,7 +118,10 @@ export function getPhoneWithTemplate(value: string, state: inputState): string {
   const { globalRegExp, config, prefix, countryCodeTemplate } = state;
   const valueWithoutCodetemplate = value.replace(globalRegExp, '').replace(/\D/g, '');
   const parsedArray = parseTemplate(config.mask);
-  const number = createNumber(parsedArray, valueWithoutCodetemplate, state);
+
+// * NOTE До этой точки у нас одинаковая логика при печатании или копировании
+
+  const number = createNumberAfterTyping(parsedArray, valueWithoutCodetemplate, state);
   const result = `${prefix}${countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '}${number}`;
 
   return result;
@@ -130,10 +133,9 @@ export function getPhoneWithTemplate(value: string, state: inputState): string {
  * * После этого мы проходим по его длине и формируем новый массив, такой же по длинне, заменяя числа
  * * своими числами. Потом мы соединим результат через join();
  */
-export function createNumber(parsedArray: string[], currentValue: string, state: inputState): string {
-  let croppedResult = currentValue;
+export function createNumberAfterTyping(parsedArray: string[], currentValue: string, state: inputState): string {
+  let croppedResult = currentValue; // Строка из цифр
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
-
   const result: string[] = [];
 
   for (let index = 0; index < parsedArray.length; index++) {
@@ -153,17 +155,77 @@ export function createNumber(parsedArray: string[], currentValue: string, state:
          */
         const resultNumber = croppedResult.slice(0, item.length);
         const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
-        // todo неверный regExp типа [123]+(?![0-9]) пропускает число 42, так как определяет двойку
         const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
         const isValid = resultNumber.match(re);
-       
-        console.log('croppedResult', croppedResult);
-        console.log('resultNumber', resultNumber);
 
         croppedResult = croppedResult.slice(item.length);
 
+        if (isValid === null) {
+          /**
+           * Тут может прийти либо одно число, либо группа чисел при копировании
+           * Если число одно и оно неверное, тогда Я просто обрезаю его
+           * Если цифр несколько (например 910 825) и после 910 8 не должно быть, то Я прерываю
+           * цикл через break
+           */
+          if (resultNumber.length > 1) {
+            /** 
+             * Если у нас группа чисел (например 3 числа в диапазоне от 1-3), то мы должны в этой группе
+             * понять, на каком месте стоит неверное число, чтобы пропустить цифры ДО него и не пропустить ПОСЛЕ
+             * Каждое число мы сравниваем по регулярному выражению и когда совпадения нет - мы заканчиваем цикл
+             */
 
-        
+            for (let j = 0; j < resultNumber.length; j++) {
+              const number = resultNumber[j];
+              const isValidNumberInGroup = number.match(re);
+
+              if (isValidNumberInGroup !== null) {
+                result.push(number);
+              } else {
+                break;
+              }
+            }
+          } else {
+            result.push(resultNumber.slice(0, resultNumber.length - 1));
+          }
+        } else {
+          result.push(resultNumber);
+        }
+      } else {
+        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
+      }
+    }
+  }
+
+  return result.join('');
+}
+
+
+export function createNumberAfterCopy(parsedArray: string[], currentValue: string, state: inputState): string {
+  let croppedResult = currentValue; // Строка из цифр
+  let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
+  const result: string[] = [];
+
+  for (let index = 0; index < parsedArray.length; index++) {
+    const item = parsedArray[index];
+
+    if (croppedResult.length !== 0) {
+      if (item === '' || item === ' ') {
+        result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
+      } else if (!isNaN(Number(item))) {
+        /**
+         * todo FIX bug
+         * Если у нас есть номер +7 (912) 1 и шаблон, по которому мы должны написать группу из 3 чисел (999) [123]-99-99
+         * когда после 1 мы вставляем 3 числа, то (croppedResult) у нас равен 1856 (потому что все 9 по одной ушли, осталась 1 и 856 из буфера)
+         * Далее наш resultNumber становится 185, потому что мы берем группу ([123]) и согласно её длине, вырезаем первые 3 числа.
+         * Таким образом, шестерка пройдет дальше, хотя после единицы код не должен работать
+         * * Делать отдельную функцию для вставки из буфера или делать проверку на число до "обрезания"??
+         */
+        const resultNumber = croppedResult.slice(0, item.length);
+        const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
+        const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
+        const isValid = resultNumber.match(re);
+
+        croppedResult = croppedResult.slice(item.length);
 
         if (isValid === null) {
           /**
