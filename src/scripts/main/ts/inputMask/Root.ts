@@ -1,4 +1,5 @@
 import { searchRegExpInMask } from './utils';
+import { parseTemplate } from 'Scripts/main/ts/inputMask/utils';
 
 export default class Root {
   state: inputState;
@@ -19,7 +20,7 @@ export default class Root {
       countryCode: config?.countryCode || this.defaultConfig.countryCode,
       placeholder: config?.placeholder || this.defaultConfig.placeholder,
       prefix: config?.prefix || this.defaultConfig.prefix,
-    }
+    };
 
     this.state = {
       value: '',
@@ -28,6 +29,7 @@ export default class Root {
       prefix: this.config.prefix || '',
       globalRegExp: new RegExp(`${this.config.countryCode}`, 'gi'),
       countryCodeTemplate: `${this.config.countryCode}`,
+      parsedMask: parseTemplate(this.config.mask),
     };
 
     this.input = input;

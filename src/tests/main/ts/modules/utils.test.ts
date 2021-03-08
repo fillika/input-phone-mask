@@ -1,4 +1,4 @@
-import { parseTemplate, searchRegExpInMask, getPhoneWithTemplate } from 'Scripts/main/ts/inputMask/utils';
+import { parseTemplate, searchRegExpInMask, getPurePhoneNumber } from 'Scripts/main/ts/inputMask/utils';
 
 describe('Test function parseTemplate', () => {
   test('Test mask ([9]99) [123]-99-91', () => {
@@ -81,7 +81,7 @@ describe('Test func searchRegExpInMask', () => {
   });
 });
 
-describe('Test func getPhoneWithTemplate', () => {
+describe('Test func getPurePhoneNumber', () => {
   const config = {
     prefix: '+',
     countryCode: '7',
@@ -96,34 +96,35 @@ describe('Test func getPhoneWithTemplate', () => {
     prefix: config.prefix || '',
     globalRegExp: new RegExp(`${config.countryCode}`, 'gi'),
     countryCodeTemplate: `${config.countryCode}`,
+    parsedMask: [''],
   };
 
   test('Test value (910) 1', () => {
     const value = '(910) 1';
-    const result = getPhoneWithTemplate(value, state);
+    const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (910) 1')
+    expect(result).toBe('+7 (910) 1');
   });
 
   test('Test value (910) 6', () => {
     const value = '(910) 6';
-    const result = getPhoneWithTemplate(value, state);
+    const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (910) ')
+    expect(result).toBe('+7 (910) ');
   });
 
   test('Test value +7 (815', () => {
     const value = '+7 (815';
-    const result = getPhoneWithTemplate(value, state);
+    const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (')
-    expect(result).not.toBe('+7 (15')
+    expect(result).toBe('+7 (');
+    expect(result).not.toBe('+7 (15');
   });
 
   test('Test value 99142', () => {
     const value = '99142';
-    const result = getPhoneWithTemplate(value, state);
+    const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (991) ')
+    expect(result).toBe('+7 (991) ');
   });
 });

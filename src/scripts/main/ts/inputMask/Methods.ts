@@ -1,5 +1,5 @@
 import Root from './Root';
-import { getPhoneWithTemplate, removeChar } from './utils';
+import { getPurePhoneNumber, getResultPhone, removeChar, createNumberAfterTyping } from './utils';
 
 /** * Тут класс с основными методами  */
 class Methods extends Root {
@@ -33,7 +33,7 @@ class Methods extends Root {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
-      const result = getPhoneWithTemplate(value, this.state); // Тут получаем результат, который нужно вводить в поле
+      const purePhoneNumber = getPurePhoneNumber(value, this.state); // Очищенный номер телефона, только цифры
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -43,6 +43,9 @@ class Methods extends Root {
        * */
       switch (inputType) {
         case 'insertText':
+          const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
+          const result = getResultPhone(phoneNumberWithTeplate, this.state);
+
           this.input.value = this.state.value = result;
           this.input.selectionStart = this.input.selectionEnd = result.length; // Управляем кареткой
 
@@ -69,7 +72,8 @@ class Methods extends Root {
            */
           const valueWithoutCodetemplate = value.replace(this.state.globalRegExp, '');
 
-          this.input.value = this.state.value = getPhoneWithTemplate(valueWithoutCodetemplate, this.state);
+          // TODO Переписать функцию со своей логикой
+          this.input.value = this.state.value = getPurePhoneNumber(valueWithoutCodetemplate, this.state);
 
           break;
         default:
