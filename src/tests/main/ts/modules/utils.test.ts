@@ -103,21 +103,21 @@ describe('Test func getPurePhoneNumber', () => {
     const value = '(910) 1';
     const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (910) 1');
+    expect(result).toBe('9101');
   });
 
   test('Test value (910) 6', () => {
     const value = '(910) 6';
     const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (910) ');
+    expect(result).toBe('9106');
   });
 
   test('Test value +7 (815', () => {
     const value = '+7 (815';
     const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (');
+    expect(result).toBe('815');
     expect(result).not.toBe('+7 (15');
   });
 
@@ -125,6 +125,6 @@ describe('Test func getPurePhoneNumber', () => {
     const value = '99142';
     const result = getPurePhoneNumber(value, state);
 
-    expect(result).toBe('+7 (991) ');
+    expect(result).toBe('99142');
   });
 });
