@@ -125,6 +125,11 @@ export function getPurePhoneNumber(value: string, state: inputState): string {
  * * своими числами. Потом мы соединим результат через join();
  */
 export function createNumberAfterTyping(purePhoneNumber: string, state: inputState): string {
+  // Если на раннем этапе телефона нет и тут вводится ересь (буквы или еще что), то сразу return
+  if (purePhoneNumber.length === 0) {
+    return '';
+  }
+
   const result: string[] = [];
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
 
@@ -164,32 +169,45 @@ export function getResultPhone(phoneNumberWithTeplate: string, state: inputState
 }
 
 // Копия функции, которую буду переделывать под функцию копирования
-export function createNumberAfterCopy(parsedArray: string[], currentValue: string, state: inputState): string {
-  let croppedResult = currentValue; // Строка из цифр
+export function createNumberAfterCopy(purePhoneNumber: string, state: inputState): string {
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
   const result: string[] = [];
 
-  for (let index = 0; index < parsedArray.length; index++) {
-    const item = parsedArray[index];
+  for (let index = 0; index < state.parsedMask.length; index++) {
+    const item = state.parsedMask[index];
 
-    if (croppedResult.length !== 0) {
+    if (purePhoneNumber.length !== 0) {
       if (item === '' || item === ' ') {
         result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
       } else if (!isNaN(Number(item))) {
         /**
          * todo FIX bug
          * Если у нас есть номер +7 (912) 1 и шаблон, по которому мы должны написать группу из 3 чисел (999) [123]-99-99
-         * когда после 1 мы вставляем 3 числа, то (croppedResult) у нас равен 1856 (потому что все 9 по одной ушли, осталась 1 и 856 из буфера)
+         * когда после 1 мы вставляем 3 числа, то (purePhoneNumber) у нас равен 1856 (потому что все 9 по одной ушли, осталась 1 и 856 из буфера)
          * Далее наш resultNumber становится 185, потому что мы берем группу ([123]) и согласно её длине, вырезаем первые 3 числа.
          * Таким образом, шестерка пройдет дальше, хотя после единицы код не должен работать
          * * Делать отдельную функцию для вставки из буфера или делать проверку на число до "обрезания"??
          */
-        const resultNumber = croppedResult.slice(0, item.length);
+        const resultNumber = purePhoneNumber.slice(0, item.length);
         const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
         const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
         const isValid = resultNumber.match(re);
 
-        croppedResult = croppedResult.slice(item.length);
+// TODO Переписать логику
+
+
+        if (purePhoneNumber.length > 1) {
+          // Если скопированное число более 1 в длину, наприме 854
+
+          console.log('purePhoneNumber', purePhoneNumber);
+          
+          if (isValid === null) {
+            break
+          }
+        }
+
+        purePhoneNumber = purePhoneNumber.slice(item.length);
+
 
         if (isValid === null) {
           /**

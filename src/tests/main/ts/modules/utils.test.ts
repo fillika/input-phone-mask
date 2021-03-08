@@ -1,4 +1,9 @@
-import { parseTemplate, searchRegExpInMask, getPurePhoneNumber, createNumberAfterTyping } from 'Scripts/main/ts/inputMask/utils';
+import {
+  parseTemplate,
+  searchRegExpInMask,
+  getPurePhoneNumber,
+  createNumberAfterTyping,
+} from 'Scripts/main/ts/inputMask/utils';
 
 describe('Test function parseTemplate', () => {
   test('Test mask ([9]99) [123]-99-91', () => {
@@ -144,7 +149,7 @@ describe('Test func createNumberAfterTyping', () => {
     prefix: config.prefix || '',
     globalRegExp: new RegExp(`${config.countryCode}`, 'gi'),
     countryCodeTemplate: `${config.countryCode}`,
-    parsedMask: ["([", "9", "]", "9", "9", ") [", "123", "]-", "9", "9", "-", "9", "9"],
+    parsedMask: ['([', '9', ']', '9', '9', ') [', '123', ']-', '9', '9', '-', '9', '9'],
   };
 
   test('Test value 9108', () => {
@@ -166,5 +171,12 @@ describe('Test func createNumberAfterTyping', () => {
     const result = createNumberAfterTyping(value, state);
 
     expect(result).toBe('(');
+  });
+
+  test('Test value ret', () => {
+    const value = 'ret';
+    const result = createNumberAfterTyping(value, state);
+
+    expect(result).toBe('');
   });
 });

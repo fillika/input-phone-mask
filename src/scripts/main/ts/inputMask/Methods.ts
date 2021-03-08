@@ -1,5 +1,11 @@
 import Root from './Root';
-import { getPurePhoneNumber, getResultPhone, removeChar, createNumberAfterTyping } from './utils';
+import {
+  getPurePhoneNumber,
+  getResultPhone,
+  removeChar,
+  createNumberAfterTyping,
+  createNumberAfterCopy,
+} from './utils';
 
 /** * Тут класс с основными методами  */
 class Methods extends Root {
@@ -44,10 +50,12 @@ class Methods extends Root {
       switch (inputType) {
         case 'insertText':
           const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
-          const result = getResultPhone(phoneNumberWithTeplate, this.state);
 
-          this.input.value = this.state.value = result;
-          this.input.selectionStart = this.input.selectionEnd = result.length; // Управляем кареткой
+          this.input.value = this.state.value = getResultPhone(phoneNumberWithTeplate, this.state);
+          this.input.selectionStart = this.input.selectionEnd = getResultPhone(
+            phoneNumberWithTeplate,
+            this.state
+          ).length; // Управляем кареткой
 
           break;
         case 'deleteContentBackward':
@@ -70,10 +78,10 @@ class Methods extends Root {
            * * при копировании пользователь может захватить кусок нашего шаблона (маски)
            * * чтобы это отсеять мы создаем регулярку, которая включает шаблон кода страны
            */
-          const valueWithoutCodetemplate = value.replace(this.state.globalRegExp, '');
-
-          // TODO Переписать функцию со своей логикой
-          this.input.value = this.state.value = getPurePhoneNumber(valueWithoutCodetemplate, this.state);
+          this.input.value = this.state.value = getResultPhone(
+            createNumberAfterCopy(purePhoneNumber, this.state),
+            this.state
+          );
 
           break;
         default:
