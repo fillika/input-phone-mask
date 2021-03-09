@@ -1,8 +1,9 @@
 # EasyPhoneMask
-Simple input mask for phone.Only phones. Vanilla JS. It's very light (less 13kb after gzip);
+Simple input mask for phone. Only phones. ***Not working in IE11***.  
+Vanilla JS. It's very light (less 13kb after gzip) and have a simple config.
 
 # Get started
-```
+```js
 const config = {
     mask: '([9]99) [999]-99-99',
     countryCode: 7,
@@ -17,17 +18,13 @@ const input = new EasyPhoneMask(
 ```
 # Attributes
 ## mask
-***Required***
-
+***Required***  
 Any character function will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.
 
 
-9 - it's any number
-
-[9] - it's only one nine
-
-([98]9) - first two numbers only 9 or 8.
-
+9 - it's any number  
+[9] - it's only one nine  
+([98]9) - first two numbers only 9 or 8.  
 ([9]87) 22 - first nubmer only 9, second only 8, third only seven etc.
 
 ## countryCode
