@@ -174,8 +174,15 @@ describe('Test func createNumberAfterTyping', () => {
     expect(result).toBe('(');
   });
 
+  test('Test value 9ret', () => {
+    const value = getPurePhoneNumber('9ret', state);
+    const result = createNumberAfterTyping(value, state);
+
+    expect(result).toBe('(9');
+  });
+
   test('Test value ret', () => {
-    const value = 'ret';
+    const value = getPurePhoneNumber('ret', state);
     const result = createNumberAfterTyping(value, state);
 
     expect(result).toBe('');
@@ -220,4 +227,15 @@ describe('Test func createNumberAfterCopy', () => {
 
     expect(result).toBe('(');
   });
+
+  test('Test value 991141', () => {
+    const value = '991141';
+    const result = createNumberAfterCopy(value, state);
+
+    expect(result).toBe('(991) 1');
+  });
+});
+
+describe('Test func removeChar', () => {
+  test.todo('Function removeChar');
 });

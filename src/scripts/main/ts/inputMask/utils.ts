@@ -16,7 +16,7 @@ export function parseTemplate(mask: string): string[] {
 
     result.push(m[0]);
   }
-
+  
   return result.filter(Boolean);
 }
 
@@ -125,12 +125,13 @@ export function getPurePhoneNumber(value: string, state: inputState): string {
  * * своими числами. Потом мы соединим результат через join();
  */
 export function createNumberAfterTyping(purePhoneNumber: string, state: inputState): string {
+  const result: string[] = [];
+
   // Если на раннем этапе телефона нет и тут вводится ересь (буквы или еще что), то сразу return
   if (purePhoneNumber.length === 0) {
-    return '';
+    return result.join('');
   }
 
-  const result: string[] = [];
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
 
   for (let index = 0; index < state.parsedMask.length; index++) {
@@ -157,7 +158,7 @@ export function createNumberAfterTyping(purePhoneNumber: string, state: inputSta
       }
     }
   }
-
+  
   return result.join('');
 }
 
@@ -183,19 +184,14 @@ export function createNumberAfterCopy(purePhoneNumber: string, state: inputState
          * Если группа чисел, то Я проверяю каждое число и пушу их по очереди.
          * Если встречаю число, которое не подходит - прерываю общий цикл
          */
-        if (resultNumber.length > 1) {
-          loop2: for (let j = 0; j < resultNumber.length; j++) {
-            const number = resultNumber[j];
 
-            if (number.match(re) !== null) {
-              result.push(number); // Убираю квадратные скобки
-            } else {
-              break loop1;
-            }
-          }
-        } else {
-          if (isValid !== null) {
-            result.push(resultNumber); // Убираю квадратные скобки
+        loop2: for (let j = 0; j < resultNumber.length; j++) {
+          const number = resultNumber[j];
+
+          if (number.match(re) !== null) {
+            result.push(number); // Убираю квадратные скобки
+          } else {
+            break loop1;
           }
         }
       } else {
