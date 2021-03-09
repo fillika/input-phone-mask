@@ -25,7 +25,7 @@ Any character function will be insert to input. For example mask (999) 99\*99-99
 9 - it's any number  
 [9] - it's only one nine  
 ([98]9) - first two numbers only 9 or 8.  
-([9]87) 22 - first nubmer only 9, second only 8, third only seven etc.
+([9]87) 22 - first number only 9, second only 8, third only seven etc.
 
 ## countryCode
 It's string or number.
