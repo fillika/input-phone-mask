@@ -1,4 +1,4 @@
-# input-phone-mask
+# EasyPhoneMask
 Simple input mask for phone.Only phones. Vanilla JS. It's very light (less 13kb after gzip);
 
 # Get started

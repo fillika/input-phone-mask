@@ -1,5 +1,5 @@
 {
-  "name": "input-phone-mask",
+  "name": "easy-phone-mask",
   "version": "1.0.0",
   "description": "Simple input phone mask on vanilla js",
   "main": "index.js",
@@ -13,7 +13,7 @@
     "inputMask",
     "vanilla",
     "js",
-    "mask",
+    "phone mask",
     "mask",
     "js"
   ],
