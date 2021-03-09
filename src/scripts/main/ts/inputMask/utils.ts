@@ -1,3 +1,5 @@
+import { is } from '@babel/types';
+
 /**
  * * Парсинг входящего шаблона (маски)
  * * Тут Я получаю массив элементов из маски
@@ -173,71 +175,38 @@ export function createNumberAfterCopy(purePhoneNumber: string, state: inputState
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
   const result: string[] = [];
 
-  for (let index = 0; index < state.parsedMask.length; index++) {
+  loop1: for (let index = 0; index < state.parsedMask.length; index++) {
     const item = state.parsedMask[index];
 
     if (purePhoneNumber.length !== 0) {
       if (item === '' || item === ' ') {
         result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
       } else if (!isNaN(Number(item))) {
-        /**
-         * todo FIX bug
-         * Если у нас есть номер +7 (912) 1 и шаблон, по которому мы должны написать группу из 3 чисел (999) [123]-99-99
-         * когда после 1 мы вставляем 3 числа, то (purePhoneNumber) у нас равен 1856 (потому что все 9 по одной ушли, осталась 1 и 856 из буфера)
-         * Далее наш resultNumber становится 185, потому что мы берем группу ([123]) и согласно её длине, вырезаем первые 3 числа.
-         * Таким образом, шестерка пройдет дальше, хотя после единицы код не должен работать
-         * * Делать отдельную функцию для вставки из буфера или делать проверку на число до "обрезания"??
-         */
         const resultNumber = purePhoneNumber.slice(0, item.length);
         const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
         const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
         const isValid = resultNumber.match(re);
 
-// TODO Переписать логику
-
-
-        if (purePhoneNumber.length > 1) {
-          // Если скопированное число более 1 в длину, наприме 854
-
-          console.log('purePhoneNumber', purePhoneNumber);
-          
-          if (isValid === null) {
-            break
-          }
-        }
-
         purePhoneNumber = purePhoneNumber.slice(item.length);
 
+        /**
+         * Если группа чисел, то Я проверяю каждое число и пушу их по очереди. 
+         * Если встречаю число, которое не подходит - прерываю общий цикл
+         */
+        if (resultNumber.length > 1) {
+          loop2: for (let j = 0; j < resultNumber.length; j++) {
+            const number = resultNumber[j];
 
-        if (isValid === null) {
-          /**
-           * Тут может прийти либо одно число, либо группа чисел при копировании
-           * Если число одно и оно неверное, тогда Я просто обрезаю его
-           * Если цифр несколько (например 910 825) и после 910 8 не должно быть, то Я прерываю
-           * цикл через break
-           */
-          if (resultNumber.length > 1) {
-            /**
-             * Если у нас группа чисел (например 3 числа в диапазоне от 1-3), то мы должны в этой группе
-             * понять, на каком месте стоит неверное число, чтобы пропустить цифры ДО него и не пропустить ПОСЛЕ
-             * Каждое число мы сравниваем по регулярному выражению и когда совпадения нет - мы заканчиваем цикл
-             */
-
-            for (let j = 0; j < resultNumber.length; j++) {
-              const number = resultNumber[j];
-              const isValidNumberInGroup = number.match(re);
-
-              if (isValidNumberInGroup !== null) {
-                result.push(number);
-              } else {
-                break;
-              }
+            if (number.match(re) !== null) {
+              result.push(number); // Убираю квадратные скобки
+            } else {
+              break loop1;
             }
-          } else {
-            result.push(resultNumber.slice(0, resultNumber.length - 1));
           }
         } else {
-          result.push(resultNumber);
+          if (isValid !== null) {
+            result.push(resultNumber); // Убираю квадратные скобки
+          }
         }
       } else {
         result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
