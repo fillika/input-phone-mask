@@ -19,7 +19,7 @@ const input = new EasyPhoneMask(
 # Attributes
 ## mask
 ***Required***  
-Any character function will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.
+Any character (except [] and letters) will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.
 
 
 9 - it's any number  
