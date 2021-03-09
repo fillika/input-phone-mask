@@ -1,3 +1,7 @@
 index.html
 **/*.js.map
-node_modules
+node_modules/
+.idea/
+dist/
+.vscode/
+coverage
