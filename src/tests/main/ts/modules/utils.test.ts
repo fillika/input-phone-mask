@@ -3,6 +3,7 @@ import {
   searchRegExpInMask,
   getPurePhoneNumber,
   createNumberAfterTyping,
+  createNumberAfterCopy,
 } from 'Scripts/main/ts/inputMask/utils';
 
 describe('Test function parseTemplate', () => {
@@ -178,5 +179,45 @@ describe('Test func createNumberAfterTyping', () => {
     const result = createNumberAfterTyping(value, state);
 
     expect(result).toBe('');
+  });
+});
+
+describe('Test func createNumberAfterCopy', () => {
+  const config = {
+    prefix: '+',
+    countryCode: '7',
+    mask: '([9]99) [123]-99-99',
+    placeholder: false,
+  };
+
+  const state: inputState = {
+    value: '',
+    config: config,
+    myTemplate: searchRegExpInMask(config.mask),
+    prefix: config.prefix || '',
+    globalRegExp: new RegExp(`${config.countryCode}`, 'gi'),
+    countryCodeTemplate: `${config.countryCode}`,
+    parsedMask: ['([', '9', ']', '9', '9', ') [', '123', ']-', '9', '9', '-', '9', '9'],
+  };
+
+  test('Test value 9108', () => {
+    const value = '9108';
+    const result = createNumberAfterCopy(value, state);
+
+    expect(result).toBe('(910) ');
+  });
+
+  test('Test value 999222', () => {
+    const value = '999222';
+    const result = createNumberAfterCopy(value, state);
+
+    expect(result).toBe('(999) 222');
+  });
+
+  test('Test value 851', () => {
+    const value = '851';
+    const result = createNumberAfterCopy(value, state);
+
+    expect(result).toBe('(');
   });
 });

@@ -1,5 +1,3 @@
-import { is } from '@babel/types';
-
 /**
  * * Парсинг входящего шаблона (маски)
  * * Тут Я получаю массив элементов из маски
@@ -163,14 +161,6 @@ export function createNumberAfterTyping(purePhoneNumber: string, state: inputSta
   return result.join('');
 }
 
-export function getResultPhone(phoneNumberWithTeplate: string, state: inputState): string {
-  const { prefix, countryCodeTemplate } = state;
-  return `${prefix}${
-    countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '
-  }${phoneNumberWithTeplate}`;
-}
-
-// Копия функции, которую буду переделывать под функцию копирования
 export function createNumberAfterCopy(purePhoneNumber: string, state: inputState): string {
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
   const result: string[] = [];
@@ -190,7 +180,7 @@ export function createNumberAfterCopy(purePhoneNumber: string, state: inputState
         purePhoneNumber = purePhoneNumber.slice(item.length);
 
         /**
-         * Если группа чисел, то Я проверяю каждое число и пушу их по очереди. 
+         * Если группа чисел, то Я проверяю каждое число и пушу их по очереди.
          * Если встречаю число, которое не подходит - прерываю общий цикл
          */
         if (resultNumber.length > 1) {
@@ -215,4 +205,11 @@ export function createNumberAfterCopy(purePhoneNumber: string, state: inputState
   }
 
   return result.join('');
+}
+
+export function getResultPhone(phoneNumberWithTeplate: string, state: inputState): string {
+  const { prefix, countryCodeTemplate } = state;
+  return `${prefix}${
+    countryCodeTemplate === '' ? countryCodeTemplate : countryCodeTemplate + ' '
+  }${phoneNumberWithTeplate}`;
 }
