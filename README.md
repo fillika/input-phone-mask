@@ -15,7 +15,8 @@ const input = new EasyPhoneMask(
     config
 )
 ```
-# mask
+# Attributes
+## mask
 ***Required***
 
 Any character function will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.
@@ -29,11 +30,11 @@ Any character function will be insert to input. For example mask (999) 99\*99-99
 
 ([9]87) 22 - first nubmer only 9, second only 8, third only seven etc.
 
-# countryCode
+## countryCode
 It's string or number.
 
-# prefix
+## prefix
 If you want to use prefix, like +7 or +3 before phone number.
 
-# placeholder
+## placeholder
 Boolean or string. It's replace HTML placeholder.
