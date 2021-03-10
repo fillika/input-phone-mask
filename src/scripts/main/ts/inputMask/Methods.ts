@@ -92,7 +92,7 @@ class Methods extends Root {
 
   protected setPlaceholder() {
     if (typeof this.config.placeholder === 'boolean' && this.config.placeholder) {
-      this.input.placeholder = this.state.prefix + this.config.countryCode.toString();
+      this.input.placeholder = this.state.prefix + this.config.countryCode!.toString();
     } else if (typeof this.config.placeholder === 'string') {
       this.input.placeholder = this.config.placeholder;
     }

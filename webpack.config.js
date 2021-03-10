@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const isDev = process.env.NODE_ENV === 'development';
+const PACKAGE = require('./package.json');
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -22,7 +23,7 @@ module.exports = {
   entry: entry,
   output: {
     path: isDev ? path.resolve(__dirname, './dist/dev/') : path.resolve(__dirname, './dist/build/'),
-    filename: isDev ? '[name]/dev.[name].min.js' : '[name]/build.[name].min.js',
+    filename: isDev ? '[name]/dev.[name].min.js' : `easyPhoneMask.${PACKAGE.version}.min.js`,
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
