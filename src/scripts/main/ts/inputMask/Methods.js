@@ -1,5 +1,5 @@
-import Root from './Root';
-import { getPurePhoneNumber, getResultPhone, removeChar, createNumberAfterTyping, createNumberAfterCopy, } from './utils';
+import Root from './Root.js';
+import { getPurePhoneNumber, getResultPhone, removeChar, createNumberAfterTyping, createNumberAfterCopy, } from './utils.js';
 class Methods extends Root {
     constructor(input, config) {
         super(input, config);

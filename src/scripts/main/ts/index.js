@@ -1,1 +1,1 @@
-import './inputMask/index';
+import './inputMask/index.js';

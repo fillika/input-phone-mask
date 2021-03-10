@@ -1,6 +1,4 @@
-import { searchRegExpInMask } from './utils';
-import { parseTemplate } from 'Scripts/main/ts/inputMask/utils';
-
+import { searchRegExpInMask, parseTemplate } from './utils';
 export default class Root {
   state: inputState;
   input: HTMLInputElement;

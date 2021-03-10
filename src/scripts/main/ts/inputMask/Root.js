@@ -1,5 +1,4 @@
-import { searchRegExpInMask } from './utils';
-import { parseTemplate } from 'Scripts/main/ts/inputMask/utils';
+import { searchRegExpInMask, parseTemplate } from './utils.js';
 export default class Root {
     constructor(input, config) {
         this.defaultConfig = {

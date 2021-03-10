@@ -1,4 +1,4 @@
-import Methods from './Methods';
+import Methods from './Methods.js';
 class EasyPhoneMask extends Methods {
     constructor(input, config) {
         super(input, config);
