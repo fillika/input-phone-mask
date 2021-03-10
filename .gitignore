@@ -2,6 +2,6 @@ index.html
 **/*.js.map
 node_modules/
 .idea/
-dist/
+dist/dev
 .vscode/
 coverage
