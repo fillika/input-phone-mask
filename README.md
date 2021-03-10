@@ -18,15 +18,15 @@ const iMask = new EasyPhoneMask(
 ```
 
 ```ts
-mask: string;
+mask?: string;
 countryCode?: number | string;
 prefix?: string;
 placeholder?: boolean | string;
 ```
 # Attributes
 ## mask
-***Required***  
-Any character (except [] and letters) will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.
+Any character (except [] and letters) will be insert to input. For example mask (999) 99\*99-99 be like ***(912) 12\*34-56***.  
+Default mask is '(999) 999-99-99'
 
 
 9 - it's any number  
