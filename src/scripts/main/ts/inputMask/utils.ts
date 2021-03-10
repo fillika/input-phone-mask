@@ -16,7 +16,7 @@ export function parseTemplate(mask: string): string[] {
 
     result.push(m[0]);
   }
-  
+
   return result.filter(Boolean);
 }
 
@@ -115,6 +115,7 @@ export function searchRegExpInMask(mask: string) {
  */
 export function getPurePhoneNumber(value: string, state: inputState): string {
   // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
+
   return value.replace(state.globalRegExp, '').replace(/\D/g, '');
 }
 
@@ -158,7 +159,7 @@ export function createNumberAfterTyping(purePhoneNumber: string, state: inputSta
       }
     }
   }
-  
+
   return result.join('');
 }
 

@@ -27,7 +27,7 @@ export default class Root {
       config: this.config,
       myTemplate: searchRegExpInMask(this.config.mask),
       prefix: this.config.prefix || '',
-      globalRegExp: new RegExp(`${this.config.countryCode}`, 'gi'),
+      globalRegExp: new RegExp(`${this.config.countryCode}`),
       countryCodeTemplate: `${this.config.countryCode}`,
       parsedMask: parseTemplate(this.config.mask),
     };
