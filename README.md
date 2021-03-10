@@ -11,10 +11,17 @@ const config = {
     placeholder: false
 }
 
-const input = new EasyPhoneMask(
+const iMask = new EasyPhoneMask(
     document.querySelector('input'),
     config
 )
+```
+
+```ts
+mask: string;
+countryCode?: number | string;
+prefix?: string;
+placeholder?: boolean | string;
 ```
 # Attributes
 ## mask
@@ -35,3 +42,17 @@ If you want to use prefix, like +7 or +3 before phone number.
 
 ## placeholder
 Boolean or string. It's replace HTML placeholder.
+
+# Methods
+
+## unmask
+```js
+iMask.unmask();
+```
+If you need to unmask input.
+
+## reinit
+```js
+iMask.reinit(config)
+```
+If you need reinit mask with new config use **reinit** method.

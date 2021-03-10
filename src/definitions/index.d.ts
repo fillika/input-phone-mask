@@ -1,6 +1,6 @@
 type Tconfig = {
   mask: string;
-  countryCode: number | string;
+  countryCode?: number | string;
   prefix?: string;
   placeholder?: boolean | string;
 };
