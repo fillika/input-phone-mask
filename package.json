@@ -1,6 +1,6 @@
 {
   "name": "easy-phone-mask",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simple input phone mask on vanilla js",
   "main": "index.js",
   "repository": {
