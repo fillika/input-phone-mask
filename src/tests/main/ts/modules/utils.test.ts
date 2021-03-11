@@ -4,7 +4,29 @@ import {
   getPurePhoneNumber,
   createNumberAfterTyping,
   createNumberAfterCopy,
-} from 'Scripts/main/ts/inputMask/utils';
+} from '../../../../scripts/main/ts/inputMask/utils';
+
+type Tconfig = {
+  mask: string;
+  countryCode?: number | string;
+  prefix?: string;
+  placeholder?: boolean | string;
+};
+
+type inputState = {
+  value: string;
+  config: Tconfig;
+  myTemplate: regExpConfig[];
+  prefix: string;
+  globalRegExp: RegExp;
+  countryCodeTemplate: string;
+  parsedMask: string[]
+};
+
+type regExpConfig = {
+  length: number;
+  regExp: string;
+};
 
 describe('Test function parseTemplate', () => {
   test('Test mask ([9]99) [123]-99-91', () => {

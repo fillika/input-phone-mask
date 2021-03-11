@@ -1,3 +1,4 @@
+import Methods from './Methods';
 /**
  * * Парсинг входящего шаблона (маски)
  * * Тут Я получаю массив элементов из маски
@@ -113,9 +114,15 @@ export function searchRegExpInMask(mask: string) {
  * Получаю готовый номер с маской
  * value - чистое, не форматированное
  */
-export function getPurePhoneNumber(value: string, state: inputState): string {
-  // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
-  return value.replace(state.globalRegExp, '').replace(/\D/g, '');
+export function getPurePhoneNumber(value: string, obj: Methods): string {
+  // TODO - Проверка на положение каретки.
+  if (obj.input.selectionStart! <= (obj.state.countryCodeTemplate + obj.state.prefix).length) {
+    // Если картека внутри кода
+    return obj.state.value.replace(obj.state.globalRegExp, '').replace(/\D/g, '');
+  } else {
+    // * note Двойная регулярка. Сначала убираю шаблон с кодом. Потом убираю лишние символы (тире, скобки)
+    return value.replace(obj.state.globalRegExp, '').replace(/\D/g, '');
+  }
 }
 
 /**

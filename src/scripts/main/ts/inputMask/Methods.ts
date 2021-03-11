@@ -40,7 +40,8 @@ class Methods extends Root {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
       const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;
-      const purePhoneNumber = getPurePhoneNumber(value, this.state); // Очищенный номер телефона, только цифры
+      const purePhoneNumber = getPurePhoneNumber(value, this); // Очищенный номер телефона, только цифры
+
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
