@@ -26,7 +26,7 @@ class Methods extends Root {
     const value = this.input.value;
 
     if (value.length === 0) {
-      this.input.value = this.state.prefix + this.state.countryCodeTemplate;
+      this.input.value = this.state.value = this.state.prefix + this.state.countryCodeTemplate;
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
       const timeoutID = setTimeout(() => {
         this.input.selectionStart = this.input.selectionEnd = this.input.value.length; // Устанавливаем каретку на начало
@@ -39,6 +39,7 @@ class Methods extends Root {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
+      const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;
       const purePhoneNumber = getPurePhoneNumber(value, this.state); // Очищенный номер телефона, только цифры
 
       /**
@@ -52,10 +53,11 @@ class Methods extends Root {
           const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
 
           this.input.value = this.state.value = getResultPhone(phoneNumberWithTeplate, this.state);
-          this.input.selectionStart = this.input.selectionEnd = getResultPhone(
-            phoneNumberWithTeplate,
-            this.state
-          ).length; // Управляем кареткой
+
+          // this.input.selectionStart = this.input.selectionEnd = getResultPhone(
+          //   phoneNumberWithTeplate,
+          //   this.state
+          // ).length; // Управляем кареткой
 
           break;
         case 'deleteContentBackward':
@@ -66,11 +68,23 @@ class Methods extends Root {
             const isNan = isNaN(Number(diff)) || diff === ' ';
 
             if (isNan) {
+              // функция работает только при удалении НЕ ЦИФРЫ
               this.input.value = removeChar(value);
             }
           }
 
-          this.state.value = this.input.value; // обновляю state.value после каждого удаления
+          // Если кол-во символов меньше длины кода и префикса - всегда даем код и префикс
+          if (this.input.value.length <= prefixAndCodeTemplate.length) {
+            this.state.value = this.input.value = prefixAndCodeTemplate;
+          } else {
+            // Если после удаления у нас осталось более 6 символов, то проверяем где картека
+            if (this.input.selectionStart! <= 6) {
+              // Если каретка находится ВНУТРИ кода страны - очищаю номер
+              this.state.value = this.input.value = prefixAndCodeTemplate;
+            } else {
+              this.state.value = this.input.value; // обновляю state.value после каждого удаления
+            }
+          }
 
           break;
         case 'insertFromPaste':
