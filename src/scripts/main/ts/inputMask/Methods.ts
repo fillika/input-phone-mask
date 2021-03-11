@@ -37,11 +37,9 @@ class Methods extends Root {
 
   protected inputEventInput(this: Methods, event: Event) {
     if (event.target !== undefined && event.target !== null) {
-      const { value } = event.target as HTMLInputElement;
       const { inputType } = event as InputEvent;
       const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;
-      const purePhoneNumber = getPurePhoneNumber(value, this); // Очищенный номер телефона, только цифры
-
+      const purePhoneNumber = getPurePhoneNumber(this.input.value, this); // Очищенный номер телефона, только цифры
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
@@ -51,8 +49,13 @@ class Methods extends Root {
        * */
       switch (inputType) {
         case 'insertText':
-          const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
+          // * Печатаем всегда по одному символу, а значит Я могу получить местоположение каретки и удалить последний символ
 
+          if (this.input.selectionStart) {
+            const currentChar = this.input.value.slice(this.input.selectionStart - 1, this.input.selectionStart);
+          }
+
+          const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
           this.input.value = this.state.value = getResultPhone(phoneNumberWithTeplate, this.state);
 
           // this.input.selectionStart = this.input.selectionEnd = getResultPhone(
@@ -62,7 +65,7 @@ class Methods extends Root {
 
           break;
         case 'deleteContentBackward':
-          const diff = this.state.value.replace(value, ''); // Нахожу символ, который удален
+          const diff = this.state.value.replace(this.input.value, ''); // Нахожу символ, который удален
 
           // note если удаляем 1 не более 1 символа
           if (diff.length === 1) {
@@ -70,7 +73,7 @@ class Methods extends Root {
 
             if (isNan) {
               // функция работает только при удалении НЕ ЦИФРЫ
-              this.input.value = removeChar(value);
+              this.input.value = removeChar(this.input.value);
             }
           }
 

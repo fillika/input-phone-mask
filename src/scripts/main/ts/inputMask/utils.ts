@@ -115,7 +115,6 @@ export function searchRegExpInMask(mask: string) {
  * value - чистое, не форматированное
  */
 export function getPurePhoneNumber(value: string, obj: Methods): string {
-  // TODO - Проверка на положение каретки.
   if (obj.input.selectionStart! <= (obj.state.countryCodeTemplate + obj.state.prefix).length) {
     // Если картека внутри кода
     return obj.state.value.replace(obj.state.globalRegExp, '').replace(/\D/g, '');
@@ -134,12 +133,16 @@ export function getPurePhoneNumber(value: string, obj: Methods): string {
 export function createNumberAfterTyping(purePhoneNumber: string, state: inputState): string {
   const result: string[] = [];
 
+  // console.log(purePhoneNumber);
+
   // Если на раннем этапе телефона нет и тут вводится ересь (буквы или еще что), то сразу return
   if (purePhoneNumber.length === 0) {
     return result.join('');
   }
 
   let croppedMaskTemplated = state.myTemplate.map(item => item); // Чтобы не было мутации
+
+  debugger;
 
   for (let index = 0; index < state.parsedMask.length; index++) {
     const item = state.parsedMask[index];
@@ -148,6 +151,9 @@ export function createNumberAfterTyping(purePhoneNumber: string, state: inputSta
       if (item === '' || item === ' ') {
         result.push(item.replace(/\[|\]/, '')); // Убираю квадратные скобки
       } else if (!isNaN(Number(item))) {
+        // TODO сделать проверку на длину и местоположение каретки
+        
+
         const resultNumber = purePhoneNumber.slice(0, item.length);
         const shiftedRegExpConfig = croppedMaskTemplated.shift(); //  regExpConfig for number group
         const re = new RegExp(shiftedRegExpConfig!.regExp, 'gi');
@@ -156,7 +162,7 @@ export function createNumberAfterTyping(purePhoneNumber: string, state: inputSta
         purePhoneNumber = purePhoneNumber.slice(item.length);
 
         if (isValid === null) {
-          result.push(resultNumber.slice(0, resultNumber.length - 1));
+          // result.push(resultNumber.slice(0, resultNumber.length - 1));
         } else {
           result.push(resultNumber);
         }
