@@ -18,8 +18,6 @@ export default function inputedValueAfterTyping(
     restValue: '',
   };
 
-  console.log(input.selectionEnd);
-
   if (position) {
     result.inputedValue = value.slice(position - 1, position);
     result.restValue = value.slice(0, position - 1) + value.slice(position);
