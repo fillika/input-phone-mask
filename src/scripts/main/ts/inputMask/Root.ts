@@ -1,5 +1,5 @@
 import { searchRegExpInMask, parseTemplate } from './utils';
-export default class Root {
+export default class Root implements IRoot {
   state: inputState;
   input: HTMLInputElement;
   defaultConfig: Tconfig;
@@ -22,7 +22,6 @@ export default class Root {
 
     this.state = {
       value: '',
-      config: this.config,
       myTemplate: searchRegExpInMask(this.config.mask),
       prefix: this.config.prefix || '',
       globalRegExp: new RegExp(`${this.config.countryCode}`),

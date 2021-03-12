@@ -21,7 +21,7 @@ class EasyPhoneMask extends Methods {
   public unmask() {
     this.input.value = '';
 
-    if (this.state.config.placeholder) {
+    if (this.config.placeholder) {
       this.input.placeholder = '';
     }
 

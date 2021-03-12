@@ -1,3 +1,10 @@
+interface IRoot {
+  state: inputState;
+  input: HTMLInputElement;
+  defaultConfig: Tconfig;
+  config: Tconfig;
+}
+
 type Tconfig = {
   mask: string;
   countryCode?: number | string;
@@ -7,7 +14,6 @@ type Tconfig = {
 
 type inputState = {
   value: string;
-  config: Tconfig;
   myTemplate: regExpConfig[];
   prefix: string;
   globalRegExp: RegExp;

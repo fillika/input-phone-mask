@@ -1,4 +1,5 @@
 import Root from './Root';
+import getNumber from './utils/getNumber';
 import {
   getPurePhoneNumber,
   getResultPhone,
@@ -38,10 +39,12 @@ class Methods extends Root {
   protected inputEventInput(this: Methods, event: Event) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
+
+      getNumber(value, this);
+
       const { inputType } = event as InputEvent;
       const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;
       const purePhoneNumber = getPurePhoneNumber(value, this); // Очищенный номер телефона, только цифры
-
 
       /**
        * https://developer.mozilla.org/en-US/docs/Web/API/InputEvent/inputType
