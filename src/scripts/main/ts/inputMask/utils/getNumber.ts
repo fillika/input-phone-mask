@@ -18,12 +18,9 @@ export default function getNumber(obj: IRoot): string {
     config: { countryCode, prefix },
     state: { globalRegExp, myTemplate },
   } = obj;
+
   const inputedValue = inputedValueAfterTyping(input, countryCode, prefix, globalRegExp);
   const validatedNumber = validationNumber(inputedValue, myTemplate);
 
   return '';
-}
-
-function clearConsole() {
-  console.clear();
 }

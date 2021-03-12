@@ -13,6 +13,7 @@ export default function validationNumber(number: string, regExpArray: regExpConf
    */
 
   let copyNumber: string = JSON.parse(JSON.stringify(number));
+  // let copyNumber: string = JSON.parse(JSON.stringify('9121'));
   let result = '';
 
   mainLoop: for (let index = 0; index < regExpArray.length; index++) {
@@ -47,6 +48,7 @@ export default function validationNumber(number: string, regExpArray: regExpConf
       break;
     }
   }
+  console.log(result);
 
   return result;
 }

@@ -35,7 +35,6 @@ export function removeChar(value: string): string {
   }
 }
 
-
 /**
  * Получаю готовый номер с маской
  * value - чистое, не форматированное
@@ -117,7 +116,6 @@ export function createNumberAfterCopy(purePhoneNumber: string, state: inputState
          * Если группа чисел, то Я проверяю каждое число и пушу их по очереди.
          * Если встречаю число, которое не подходит - прерываю общий цикл
          */
-
         loop2: for (let j = 0; j < resultNumber.length; j++) {
           const number = resultNumber[j];
 
