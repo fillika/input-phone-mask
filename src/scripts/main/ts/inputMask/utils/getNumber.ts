@@ -1,4 +1,5 @@
 import inputedValueAfterTyping from './inputedValue';
+import validationNumber from './validationNumber';
 
 /**
  * Получаем номер от клиента
@@ -12,16 +13,13 @@ export default function getNumber(value: string, obj: IRoot): string {
    * * ниже примеры для шаблона +45454 ([9]99) [999]
    * +454594, +45454 (915, +45454 (1991), +145454 (99)
    */
-  console.log(value);
-
   const { countryCode, prefix } = obj.config;
-
-  console.log(countryCode);
-  console.log(prefix);
-  
   const inputedValue = inputedValueAfterTyping(obj);
+  const validatedNumber = validationNumber(inputedValue)
+
+  console.log(validatedNumber);
   
-  
+
   /**
    * По сути мне нужны obj.config.сщг
    */
