@@ -19,12 +19,8 @@ fs.readdirSync(testFolder).forEach(file => {
   }
 });
 
-module.exports = {
+const commonConfig = {
   entry: entry,
-  output: {
-    path: isDev ? path.resolve(__dirname, './dist/dev/') : path.resolve(__dirname, './dist/build/'),
-    filename: isDev ? '[name]/dev.[name].min.js' : `easyPhoneMask.${PACKAGE.version}.min.js`,
-  },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx'],
     alias: {
@@ -35,9 +31,7 @@ module.exports = {
     },
   },
   plugins: [
-    new CleanWebpackPlugin({
-      // dry: true,
-    }),
+    new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name]/[name].min.css',
     }),
@@ -119,3 +113,127 @@ module.exports = {
     minimizer: [new CssMinimizerPlugin(), new TerserPlugin()],
   },
 };
+
+const distOutput = Object.assign({}, commonConfig, {
+  output: {
+    path: isDev ? path.resolve(__dirname, './dist/dev/') : path.resolve(__dirname, './dist/build/'),
+    filename: isDev ? '[name]/dev.[name].min.js' : `easyPhoneMask.${PACKAGE.version}.min.js`,
+    library: PACKAGE.name,
+    libraryTarget: 'umd', // exposes and know when to use module.exports or exports.
+  },
+});
+
+const rootOutput = Object.assign({}, commonConfig, {
+  output: {
+    path: isDev ? path.resolve(__dirname, './dist/dev/') : path.resolve(__dirname, './index/'),
+    filename: isDev ? '[name]/dev.[name].min.js' : `index.js`,
+    library: PACKAGE.name,
+    libraryTarget: 'umd', // exposes and know when to use module.exports or exports.
+  },
+});
+
+// Return Array of Configurations
+module.exports = [distOutput, rootOutput];
+
+// module.exports = {
+//   entry: entry,
+//   output: {
+//     path: isDev ? path.resolve(__dirname, './dist/dev/') : path.resolve(__dirname, './dist/build/'),
+//     filename: isDev ? '[name]/dev.[name].min.js' : `easyPhoneMask.${PACKAGE.version}.min.js`,
+//     library: PACKAGE.name,
+//     libraryTarget: 'umd', // exposes and know when to use module.exports or exports.
+//   },
+//   resolve: {
+//     extensions: ['.tsx', '.ts', '.js', '.jsx'],
+//     alias: {
+//       Images: path.resolve(__dirname, 'src/images/'),
+//       Scripts: path.resolve(__dirname, 'src/scripts/'),
+//       Styles: path.resolve(__dirname, 'src/styles/'),
+//       Tests: path.resolve(__dirname, 'src/tests/'),
+//     },
+//   },
+//   plugins: [
+//     new CleanWebpackPlugin({
+//       // dry: true,
+//     }),
+//     new MiniCssExtractPlugin({
+//       filename: '[name]/[name].min.css',
+//     }),
+//     new ForkTsCheckerWebpackPlugin(),
+//   ],
+//   module: {
+//     rules: [
+//       {
+//         test: /\.(js|jsx)$/,
+//         exclude: /node_modules/,
+//         use: ['babel-loader'],
+//       },
+//       {
+//         test: /\.(ts|tsx)$/,
+//         use: [
+//           {
+//             loader: 'ts-loader',
+//             options: {
+//               transpileOnly: true,
+//               experimentalWatchApi: true,
+//             },
+//           },
+//         ],
+//         exclude: /node_modules/,
+//       },
+//       {
+//         test: /\.(scss|sass|css)$/,
+//         use: [MiniCssExtractPlugin.loader, 'css-loader?url=false', 'postcss-loader', 'sass-loader'],
+//       },
+//       // images
+//       {
+//         test: /\.(png|jpe?g|gif)$/i,
+//         loader: 'file-loader',
+//         options: {
+//           name: '[path][name].[ext]',
+//         },
+//       },
+//       {
+//         test: /\.svg$/i,
+//         use: [
+//           {
+//             loader: 'url-loader',
+//             options: {
+//               generator: content => svgToMiniDataURI(content.toString()),
+//             },
+//           },
+//         ],
+//       },
+//     ],
+//   },
+//   devtool: isDev ? 'source-map' : false,
+//   optimization: {
+//     minimize: isDev ? false : true,
+//     removeAvailableModules: false,
+//     removeEmptyChunks: false,
+//     /**
+//      * Мы можем разделить библиотеки вручную. Для это пишем, внутри регулярных выражений какие библиотеки нам нужны
+//      * Например, мы можем добавить несколько библиотек в единый чанк вот в таком формате
+//      * /[\\/]node_modules[\\/](react|react-dom|lodash)[\\/]/
+//      */
+//     splitChunks: isDev
+//       ? false
+//       : {
+//           cacheGroups: {
+//             react: {
+//               test: /[\\/]node_modules[\\/]((react).*)[\\/]/,
+//               name: 'react',
+//               chunks: 'all',
+//               filename: 'libs/react.min.js',
+//             },
+//             lodash: {
+//               test: /[\\/]node_modules[\\/](lodash)[\\/]/,
+//               name: 'lodash',
+//               chunks: 'all',
+//               filename: 'libs/lodash.libs.min.js',
+//             },
+//           },
+//         },
+//     minimizer: [new CssMinimizerPlugin(), new TerserPlugin()],
+//   },
+// };

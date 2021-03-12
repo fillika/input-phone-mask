@@ -1,8 +1,8 @@
 {
   "name": "easy-phone-mask",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Simple input phone mask on vanilla js",
-  "main": "index.js",
+  "main": "./index/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fillika/input-phone-mask.git"
