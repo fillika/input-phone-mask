@@ -16,10 +16,10 @@ export default function getNumber(obj: IRoot): string {
   const {
     input,
     config: { countryCode, prefix },
-    state: { globalRegExp },
+    state: { globalRegExp, myTemplate },
   } = obj;
   const inputedValue = inputedValueAfterTyping(input, countryCode, prefix, globalRegExp);
-  const validatedNumber = validationNumber(inputedValue);
+  const validatedNumber = validationNumber(inputedValue, myTemplate);
 
   return '';
 }

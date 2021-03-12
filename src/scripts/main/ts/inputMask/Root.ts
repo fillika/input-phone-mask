@@ -1,4 +1,5 @@
-import { searchRegExpInMask, parseTemplate } from './utils';
+import { parseTemplate } from './utils';
+import searchRegExpInMask from './utils/searchRegExpInMask';
 export default class Root implements IRoot {
   state: inputState;
   input: HTMLInputElement;
