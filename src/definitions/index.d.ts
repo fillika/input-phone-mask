@@ -7,9 +7,9 @@ interface IRoot {
 
 type Tconfig = {
   mask: string;
-  countryCode?: number | string;
-  prefix?: string;
-  placeholder?: boolean | string;
+  countryCode: number | string;
+  prefix: string;
+  placeholder: boolean | string;
 };
 
 type inputState = {
@@ -18,7 +18,7 @@ type inputState = {
   prefix: string;
   globalRegExp: RegExp;
   countryCodeTemplate: string;
-  parsedMask: string[]
+  parsedMask: string[];
 };
 
 type regExpConfig = {

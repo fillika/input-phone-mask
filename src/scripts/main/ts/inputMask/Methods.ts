@@ -40,7 +40,7 @@ class Methods extends Root {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
 
-      getNumber(value, this);
+      getNumber(this);
 
       const { inputType } = event as InputEvent;
       const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;

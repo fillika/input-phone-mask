@@ -109,54 +109,6 @@ describe('Test func searchRegExpInMask', () => {
   });
 });
 
-describe('Test func getPurePhoneNumber', () => {
-  const config = {
-    prefix: '+',
-    countryCode: '7',
-    mask: '([9]99) [123]-99-99',
-    placeholder: false,
-  };
-
-  const state: inputState = {
-    value: '',
-    config: config,
-    myTemplate: searchRegExpInMask(config.mask),
-    prefix: config.prefix || '',
-    globalRegExp: new RegExp(`${config.countryCode}`, 'gi'),
-    countryCodeTemplate: `${config.countryCode}`,
-    parsedMask: [''],
-  };
-
-  test('Test value (910) 1', () => {
-    const value = '(910) 1';
-    const result = getPurePhoneNumber(value, state);
-
-    expect(result).toBe('9101');
-  });
-
-  test('Test value (910) 6', () => {
-    const value = '(910) 6';
-    const result = getPurePhoneNumber(value, state);
-
-    expect(result).toBe('9106');
-  });
-
-  test('Test value +7 (815', () => {
-    const value = '+7 (815';
-    const result = getPurePhoneNumber(value, state);
-
-    expect(result).toBe('815');
-    expect(result).not.toBe('+7 (15');
-  });
-
-  test('Test value 99142', () => {
-    const value = '99142';
-    const result = getPurePhoneNumber(value, state);
-
-    expect(result).toBe('99142');
-  });
-});
-
 describe('Test func createNumberAfterTyping', () => {
   const config = {
     prefix: '+',
@@ -194,20 +146,6 @@ describe('Test func createNumberAfterTyping', () => {
     const result = createNumberAfterTyping(value, state);
 
     expect(result).toBe('(');
-  });
-
-  test('Test value 9ret', () => {
-    const value = getPurePhoneNumber('9ret', state);
-    const result = createNumberAfterTyping(value, state);
-
-    expect(result).toBe('(9');
-  });
-
-  test('Test value ret', () => {
-    const value = getPurePhoneNumber('ret', state);
-    const result = createNumberAfterTyping(value, state);
-
-    expect(result).toBe('');
   });
 });
 

@@ -3,6 +3,12 @@
  * вернуть все, что прошло валидацию
  */
 export default function validationNumber(number: string): string {
-  // TODO написать валидацию
+  // TODO написать валидацию.
+  // TODO получить шаблон
+  /**
+   * У меня есть чистый номер, который мне нужно проверить в шаблоне
+   *
+   */
+
   return `Validated: ${number}`;
 }
