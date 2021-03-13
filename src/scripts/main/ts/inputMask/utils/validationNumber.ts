@@ -48,7 +48,6 @@ export default function validationNumber(number: string, regExpArray: regExpConf
       break;
     }
   }
-  console.log(result);
 
   return result;
 }
