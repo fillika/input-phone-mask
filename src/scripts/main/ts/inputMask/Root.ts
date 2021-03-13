@@ -28,6 +28,7 @@ export default class Root implements IRoot {
       globalRegExp: new RegExp(`${this.config.countryCode}`),
       countryCodeTemplate: `${this.config.countryCode}`,
       parsedMask: parseTemplate(this.config.mask),
+      cursorPosition: 1,
     };
 
     this.input = input;

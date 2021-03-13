@@ -1,12 +1,6 @@
 import Root from './Root';
 import getNumber from './utils/getNumber';
-import {
-  getPurePhoneNumber,
-  getResultPhone,
-  removeChar,
-  createNumberAfterTyping,
-  createNumberAfterCopy,
-} from './utils';
+import { getPurePhoneNumber, getResultPhone, removeChar, createNumberAfterCopy } from './utils';
 
 /** * Тут класс с основными методами  */
 class Methods extends Root {
@@ -30,7 +24,7 @@ class Methods extends Root {
       this.input.value = this.state.value = this.state.prefix + this.state.countryCodeTemplate;
       // нулевая задержка setTimeout нужна, чтобы это сработало после получения фокуса элементом формы
       const timeoutID = setTimeout(() => {
-        this.input.selectionStart = this.input.selectionEnd = this.input.value.length; // Устанавливаем каретку на начало
+        this.input.selectionStart = this.input.selectionEnd = this.state.cursorPosition = this.input.value.length; // Устанавливаем каретку на начало
         clearTimeout(timeoutID);
       }, 10);
     }
@@ -39,9 +33,6 @@ class Methods extends Root {
   protected inputEventInput(this: Methods, event: Event) {
     if (event.target !== undefined && event.target !== null) {
       const { value } = event.target as HTMLInputElement;
-
-      getNumber(this);
-
       const { inputType } = event as InputEvent;
       const prefixAndCodeTemplate = this.state.prefix + this.state.countryCodeTemplate;
       const purePhoneNumber = getPurePhoneNumber(value, this); // Очищенный номер телефона, только цифры
@@ -54,14 +45,10 @@ class Methods extends Root {
        * */
       switch (inputType) {
         case 'insertText':
-          const phoneNumberWithTeplate = createNumberAfterTyping(purePhoneNumber, this.state);
-
-          this.input.value = this.state.value = getResultPhone(phoneNumberWithTeplate, this.state);
-
-          // this.input.selectionStart = this.input.selectionEnd = getResultPhone(
-          //   phoneNumberWithTeplate,
-          //   this.state
-          // ).length; // Управляем кареткой
+          // TODO Управление позицией каретки
+          // this.state.cursorPosition = this.input.selectionEnd!;
+          this.input.value = this.state.value = getNumber(this);
+          // this.input.selectionStart = this.input.selectionEnd = this.state.cursorPosition;
 
           break;
         case 'deleteContentBackward':

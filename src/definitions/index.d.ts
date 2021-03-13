@@ -19,6 +19,7 @@ type inputState = {
   globalRegExp: RegExp;
   countryCodeTemplate: string;
   parsedMask: string[];
+  cursorPosition: number
 };
 
 type regExpConfig = {

@@ -1,5 +1,6 @@
 import inputedValueAfterTyping from './inputedValue';
 import validationNumber from './validationNumber';
+import getResultTemplate from './getResultTemplate';
 
 /**
  * Получаем номер от клиента
@@ -16,11 +17,12 @@ export default function getNumber(obj: IRoot): string {
   const {
     input,
     config: { countryCode, prefix },
-    state: { globalRegExp, myTemplate },
+    state: { globalRegExp, myTemplate, cursorPosition },
   } = obj;
 
-  const inputedValue = inputedValueAfterTyping(input, countryCode, prefix, globalRegExp);
-  const validatedNumber = validationNumber(inputedValue, myTemplate);
+  const inputedValue = inputedValueAfterTyping(input, countryCode, prefix, globalRegExp, cursorPosition); // Сортируем введенное value
+  const validatedNumber = validationNumber(inputedValue, myTemplate); // Валидируем
+  const result = getResultTemplate(validatedNumber, obj.state); // Оборачиваем в шаблон
 
-  return '';
+  return result;
 }
