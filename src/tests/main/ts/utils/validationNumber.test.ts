@@ -1,5 +1,5 @@
 import validationNumber from '../../../../scripts/main/ts/inputMask/utils/validationNumber';
-// import EasyPhoneMask from './../../../../scripts/main/ts/inputMask/index';
+import searchRegExpInMask from './../../../../scripts/main/ts/inputMask/utils/searchRegExpInMask';
 
 describe('Test func validationNumber', () => {
   describe('Test mask ([9]99) [999]-99-99', () => {
@@ -10,23 +10,8 @@ describe('Test func validationNumber', () => {
       placeholder: false,
     };
 
-    beforeEach(() => {
-      const input = document.createElement('input');
-      // const iMask = new EasyPhoneMask(input, config);
-    });
+    const regExpArr = searchRegExpInMask(config.mask);
 
-    const regExpArr = [
-      { length: 1, regExp: '[9]' },
-      { length: 1, regExp: '(d)' },
-      { length: 1, regExp: '(d)' },
-      { length: 3, regExp: '^[9]+$' },
-      { length: 1, regExp: '(d)' },
-      { length: 1, regExp: '(d)' },
-      { length: 1, regExp: '(d)' },
-      { length: 1, regExp: '(d)' },
-    ];
-
-    // TODO тесты работают некорректно
     test('Value: 99', () => {
       const result = validationNumber('99', regExpArr);
       expect(result).toBe('99');
